@@ -22,8 +22,7 @@ Built with:
 ## Pre-requisites
 - Create a free account and get an OPEN_AI key from platform.openai.com
 - Create a free account and get access to PineconeDB
-
-And populate your `.env` file with the required information.
+- And populate your `.env` file with the required information.
 
 ## 🧞 Commands
 
