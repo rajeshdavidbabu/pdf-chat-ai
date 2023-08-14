@@ -32,8 +32,7 @@ All commands are run from the root of the project, from a terminal:
 | Command               | Action                                          |
 | :-------------------- | :-----------------------------------------------|
 | `npm install`         | Installs dependencies                           |
-| `npm run prepare:data`| Splits your PDF file under the /docs folder into|
-|                       | chunks, embeds them, uploads them to Pinecone   |
+| `npm run prepare:data`| Splits your PDF file under the /docs folder into chunks, embeds them, uploads them to Pinecone|
 | `npm run dev`         | Starts the local dev server at `localhost:3000` |
 
 ## Roadmap
