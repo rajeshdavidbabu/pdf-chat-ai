@@ -85,7 +85,6 @@ export async function callChain({ question, chatHistory }: callChainArgs) {
     const chain = makeChain(vectorStore);
 
     const formattedChatHistory = formatChatHistory(chatHistory);
-    console.log(formattedChatHistory);
 
     // Question using chat-history
     // Reference https://js.langchain.com/docs/modules/chains/popular/chat_vector_db#externally-managed-memory
