@@ -11,7 +11,6 @@ https://github.com/rajeshdavidbabu/pdf-chat-ai/assets/15684795/a62b759a-ef51-402
 ## 👩‍🚀 Description
 
 Built with:
-
 - ✅ Next-13
 - ✅ Shadcn-ui
 - ✅ Langchain Typescript integration
