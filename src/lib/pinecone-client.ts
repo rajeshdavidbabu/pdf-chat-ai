@@ -17,14 +17,14 @@ async function createIndex(client: PineconeClient, indexName: string) {
       `Waiting for ${env.INDEX_INIT_TIMEOUT} seconds for index initialization to complete...`
     );
     await delay(env.INDEX_INIT_TIMEOUT);
-    console.log("Index created");
+    console.log("Index created !!");
   } catch (error) {
+    console.error("error ", error);
     throw new Error("Index creation failed");
   }
 }
 
 async function initPineconeClient() {
-  console.log("Pinecone init ran ");
   try {
     const pineconeClient = new PineconeClient();
     await pineconeClient.init({
@@ -43,7 +43,7 @@ async function initPineconeClient() {
 
     return pineconeClient;
   } catch (error) {
-    console.log("error", error);
+    console.error("error", error);
     throw new Error("Failed to initialize Pinecone Client");
   }
 }

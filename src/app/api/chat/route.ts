@@ -4,9 +4,6 @@ import { callChain } from "@/lib/langchain";
 export async function POST(req: NextRequest) {
   const { question, chatHistory } = await req.json();
 
-  console.log("question", question);
-  console.log("history", chatHistory);
-
   if (!question) {
     return NextResponse.json(
       {
@@ -23,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     return new Response(await stream);
   } catch (error) {
-    console.log("error", error);
+    console.error("error", error);
     return NextResponse.json(
       {
         message: "Something went wrong. Try again!",
