@@ -8,7 +8,8 @@ Subscribe to my [YouTube Channel](https://www.youtube.com/channel/UCU2xH1a0ExxWX
 https://github.com/rajeshdavidbabu/pdf-chat-ai/assets/15684795/625237f6-4d1f-4ad6-91a3-7bddebe8ab35
 
 ## Architecture
-![Architecture Screenshot](https://github.com/rajeshdavidbabu/pdf-chat-ai/assets/15684795/4635271e-d580-4a26-a892-bc77d905cf72)
+<img width="1275" alt="Screenshot 2023-08-14 at 12 11 05" src="https://github.com/rajeshdavidbabu/pdf-chat-ai/assets/15684795/a2142d39-ec97-410f-89dc-907e25524fad">
+
 
 ## 👩‍🚀 Description
 
