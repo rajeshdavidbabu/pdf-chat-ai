@@ -17,6 +17,12 @@ Built with:
 - ✅ PineconeDB as knowledge store
 - ✅ Dark Mode with persistent theme-switching
 
+## Pre-requisites
+- Create a free account and get OPEN_AI key from platform.openai.com
+- Create a free account and get access to PineconeDB
+
+And populate your `.env` file with required information.
+
 ## 🧞 Commands
 
 All commands are run from the root of the project, from a terminal:
