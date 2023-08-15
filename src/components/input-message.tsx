@@ -1,11 +1,13 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 type InputMessageProps = {
   input: string;
   setInput: (value: string) => void;
   sendMessage: (value: string) => void;
   placeholder: string;
+  isLoading: boolean;
 };
 
 export function InputMessage({
@@ -13,6 +15,7 @@ export function InputMessage({
   setInput,
   sendMessage,
   placeholder,
+  isLoading,
 }: InputMessageProps) {
   return (
     <div className="p-4 flex clear-both">
@@ -41,7 +44,7 @@ export function InputMessage({
           setInput("");
         }}
       >
-        Ask
+        {isLoading ? <Spinner /> : "Ask"}
       </Button>
     </div>
   );

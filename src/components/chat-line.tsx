@@ -1,6 +1,21 @@
 import Balancer from "react-wrap-balancer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { ChatGPTMessage } from "@/types";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import ReactMarkdown from "react-markdown";
+import { sanitizeAndFormatText } from "@/lib/utils";
 
 // util helper to convert new lines to <br /> tags
 const convertNewLines = (text: string) =>
@@ -11,7 +26,11 @@ const convertNewLines = (text: string) =>
     </span>
   ));
 
-export function ChatLine({ role = "assistant", content }: ChatGPTMessage) {
+export function ChatLine({
+  role = "assistant",
+  content,
+  sources,
+}: ChatGPTMessage) {
   if (!content) {
     return null;
   }
@@ -34,6 +53,26 @@ export function ChatLine({ role = "assistant", content }: ChatGPTMessage) {
         <CardContent className="text-sm">
           <Balancer>{formattedMessage}</Balancer>
         </CardContent>
+        <CardFooter>
+          <CardDescription className="w-full">
+            {sources ? (
+              <Accordion type="single" collapsible className="w-full">
+                {sources.map((source, index) => (
+                  <AccordionItem value={`source-${index}`} key={index}>
+                    <AccordionTrigger>{`Source ${index + 1}`}</AccordionTrigger>
+                    <AccordionContent>
+                      <ReactMarkdown linkTarget="_blank">
+                        {sanitizeAndFormatText(source)}
+                      </ReactMarkdown>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            ) : (
+              <></>
+            )}
+          </CardDescription>
+        </CardFooter>
       </Card>
     </div>
   );

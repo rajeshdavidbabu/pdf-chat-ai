@@ -31,3 +31,13 @@ export const formatChatHistory = (chatHistory: [string, string][]) => {
 
   return formattedDialogueTurns.join("\n");
 };
+
+export function sanitizeAndFormatText(inputText: string) {
+  // Replace newline characters and hyphens with spaces
+  let formattedText = inputText.replace(/[\n-]/g, " ");
+
+  // Remove consecutive spaces
+  formattedText = formattedText.replace(/\s+/g, " ");
+
+  return formattedText;
+}
