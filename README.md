@@ -5,9 +5,14 @@ An AI-powered PDF chat built with Next.js 13, Langchain, and PineconeDB
 ## 👷🏾‍♂️ Want to Learn How to Build It?
 Subscribe to my [YouTube Channel](https://www.youtube.com/channel/UCU2xH1a0ExxWXC4zk1VF_Eg) for an upcoming video tutorial!
 
+## Update
+Added sources to the stream and displaying it in an accordian
 
 
-https://github.com/rajeshdavidbabu/pdf-chat-ai/assets/15684795/6141b885-abfa-4d50-b380-b2db396c08f1
+
+https://github.com/rajeshdavidbabu/pdf-chat-ai/assets/15684795/feb5331d-b43d-4778-a8dd-630d6f361197
+
+
 
 
 
@@ -44,7 +49,9 @@ All commands are run from the root of the project, from a terminal:
 | `npm run dev`         | Starts the local dev server at `localhost:3000` |
 
 ## 🚸 Roadmap
-- Add sources to the streamed chat bubble
+- ✅ Add sources to the streamed chat bubble
+- 🚧 Clean up and show proper error messages
+- 🚧 Sanitize input and output source documents
 
 ## 👏🏽 Contributing
 
