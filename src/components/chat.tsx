@@ -2,26 +2,15 @@
 
 import { useRef, useState } from "react";
 import { InputMessage } from "./input-message";
-import { scrollToBottom } from "@/lib/utils";
+import { scrollToBottom, initialMessage } from "@/lib/utils";
 import { ChatLine } from "./chat-line";
 import { ChatGPTMessage } from "@/types";
-
-let placeholder = "Type a message to start ...";
-
-// Default UI Message
-export const initialMessages: ChatGPTMessage[] = [
-  {
-    role: "assistant",
-    content:
-      "Hi! I am your PDF assistant. Please load your pdf data into my knowledge store using the command `npm run prepare:data`. Once done you can ask any question about it !! ",
-  },
-];
 
 export function Chat() {
   const endpoint = "/api/chat";
   const [input, setInput] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [messages, setMessages] = useState<ChatGPTMessage[]>(initialMessages);
+  const [messages, setMessages] = useState<ChatGPTMessage[]>(initialMessage);
   const [chatHistory, setChatHistory] = useState<[string, string][]>([]);
   const [streamingAIContent, setStreamingAIContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -41,6 +30,24 @@ export function Chat() {
   const updateStreamingAIContent = (streamingAIContent: string) => {
     setStreamingAIContent(streamingAIContent);
     setTimeout(() => scrollToBottom(containerRef), 100);
+  };
+
+  const handleStreamEnd = (
+    question: string,
+    streamingAIContent: string,
+    sourceDocuments: string
+  ) => {
+    const sources = JSON.parse(sourceDocuments);
+
+    // Add the streamed message as the AI response
+    // And clear the streamingAIContent state
+    updateMessages({
+      role: "assistant",
+      content: streamingAIContent,
+      sources,
+    });
+    updateStreamingAIContent("");
+    updateChatHistory(question, streamingAIContent);
   };
 
   // send message to API /api/chat endpoint
@@ -83,21 +90,15 @@ export function Chat() {
         }
       }
 
-      const sources = JSON.parse(sourceDocuments);
-
-      updateMessages({
-        role: "assistant",
-        content: streamingAIContent,
-        sources,
-      });
-      updateChatHistory(question, streamingAIContent);
-      updateStreamingAIContent("");
+      handleStreamEnd(question, streamingAIContent, sourceDocuments);
     } catch (error) {
       console.log("Error occured ", error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  let placeholder = "Type a message to start ...";
 
   if (messages.length > 2) {
     placeholder = "Type to continue your conversation";

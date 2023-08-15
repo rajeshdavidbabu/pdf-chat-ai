@@ -1,3 +1,4 @@
+import { ChatGPTMessage } from "@/types";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -41,3 +42,12 @@ export function sanitizeAndFormatText(inputText: string) {
 
   return formattedText;
 }
+
+// Default UI Message
+export const initialMessage: ChatGPTMessage[] = [
+  {
+    role: "assistant",
+    content:
+      "Hi! I am your PDF assistant. Please load your pdf data into my knowledge store using the command `npm run prepare:data`. Once done you can ask any question about it !! ",
+  },
+];
