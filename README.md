@@ -10,7 +10,8 @@ Added sources to the stream and displaying it in an accordian
 
 
 
-https://github.com/rajeshdavidbabu/pdf-chat-ai/assets/15684795/feb5331d-b43d-4778-a8dd-630d6f361197
+<img width="1402" alt="Embed LLM" src="https://github.com/rajeshdavidbabu/pdf-chat-ai/assets/15684795/a6f9d310-316d-4425-9b13-dd5d14121ac0">
+
 
 
 
