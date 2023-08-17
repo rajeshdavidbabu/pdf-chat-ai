@@ -34,6 +34,8 @@ function makeChain(
   const streamingModel = new ChatOpenAI({
     modelName: "gpt-3.5-turbo",
     streaming: true,
+    temperature: 0,
+    verbose: true,
     callbacks: [
       {
         async handleLLMNewToken(token) {
@@ -46,7 +48,11 @@ function makeChain(
       },
     ],
   });
-  const nonStreamingModel = new ChatOpenAI({ modelName: "gpt-3.5-turbo" });
+  const nonStreamingModel = new ChatOpenAI({
+    modelName: "gpt-3.5-turbo",
+    verbose: true,
+    temperature: 0,
+  });
 
   const chain = ConversationalRetrievalQAChain.fromLLM(
     streamingModel,
