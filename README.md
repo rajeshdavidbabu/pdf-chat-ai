@@ -3,7 +3,8 @@
 An AI-powered PDF chat built with Next.js 13, Langchain, and PineconeDB
 
 ## 👷🏾‍♂️ Want to Learn How to Build It?
-Subscribe to my [YouTube Channel](https://www.youtube.com/channel/UCU2xH1a0ExxWXC4zk1VF_Eg) for an upcoming video tutorial!
+Check out the tutorial on my YT [channel](https://www.youtube.com/watch?v=oiCFr19NtPo&t)
+
 
 ## ✨Update✨
 Added sources to the stream and displaying it in an accordian
