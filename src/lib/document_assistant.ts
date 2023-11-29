@@ -13,16 +13,10 @@ import { env } from "./config";
 let documentAssistantManagerInstance: DocumentAssistantManager | null = null;
 
 export class DocumentAssistantManager {
-  private pineconeClientInstance: PineconeClient | null = null;
 
   async Init(filePathOrBlob: string | Blob, key: string) {
-
-    this.pineconeClientInstance = await initPineconeClient(key);
-
-
-
     try {
-      const pineconeClient = await getPineconeClient();
+      const pineconeClient = await initPineconeClient(key);
       if (pineconeClient===null){
           return
       }
@@ -34,7 +28,6 @@ export class DocumentAssistantManager {
     } catch (error) {
       console.error("Init client script failed ", error);
     }
-
   }
 }
 

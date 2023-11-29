@@ -7,8 +7,8 @@ import { DocumentAssistantManager, getDocumentAssistantManager,initDocumentAssis
 
 export async function POST(req: NextRequest) {
   initDocumentAssistantManager("docs/great-gatsby.pdf", "deep-learning-bishop-pdf")
-  let docassist=await getDocumentAssistantManager()
-  const { question, chatHistory } = await req.json();
+  let docassist = await getDocumentAssistantManager()
+  const { question, chatHistory, translation, targetLang } = await req.json();
 
   if (!question) {
     return NextResponse.json("Error: No question in the request", {
@@ -22,6 +22,8 @@ export async function POST(req: NextRequest) {
       question,
       chatHistory,
       transformStream,
+      translation: translation || question.includes("translate"),
+      targetLang: targetLang || "Chinese", 
     });
 
     return new Response(await readableStream);
