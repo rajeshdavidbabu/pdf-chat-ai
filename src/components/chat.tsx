@@ -78,12 +78,21 @@ export function Chat() {
         if (done) {
           break;
         }
-
+        
         const text = new TextDecoder().decode(value);
-        if (text === "tokens-ended" && !tokensEnded) {
+        if (text.includes("tokens-ended") && !tokensEnded) {
           tokensEnded = true;
+
+          let texts = text.split("tokens-ended");
+          if (texts.length > 1) {
+            streamingAIContent = streamingAIContent + texts[1];
+            updateStreamingAIContent(streamingAIContent);
+          }
+          if (texts.length > 2) {
+            sourceDocuments += texts[2];
+          }
         } else if (tokensEnded) {
-          sourceDocuments = text;
+          sourceDocuments += text;
         } else {
           streamingAIContent = streamingAIContent + text;
           updateStreamingAIContent(streamingAIContent);
