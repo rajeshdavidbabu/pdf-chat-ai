@@ -8,13 +8,19 @@ const chat = new ChatOpenAI({
 });
 
 type callQueryArgs = {
+    language: string;
     question: string;
     transformStream: TransformStream;
   };
+
+const QA_TEMPLATE = (language: string, question: string) => `Please translate this into {language}.
+  Content: {question}
+  Helpful answer in markdown:`;
   
 
 // Function to call ChatGPT and get a response
 export async function callDirectQuery({
+    language,
     question,
     transformStream,
   }: callQueryArgs) {
@@ -28,7 +34,7 @@ export async function callDirectQuery({
     const writer = transformStream.writable.getWriter();
   
     try {
-        chat.call([new HumanChatMessage(question)]).then(async (res) => {
+        chat.call([new HumanChatMessage(QA_TEMPLATE(language, question))]).then(async (res) => {
         await writer.ready;
         await writer.write(encoder.encode("tokens-ended"));
         setTimeout(async () => {
