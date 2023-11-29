@@ -12,6 +12,13 @@ Chat History:
 Follow Up Input: {question}
 Standalone question:`;
 
+const TRANSLATE_TEMPLATE = `You are an enthusiastic AI translator. Use the following pieces of context to answer the question at the end.
+
+{context}
+
+Question: {question}
+Target language: {target_lang}
+Helpful answer in markdown:`;
 
 const QA_TEMPLATE = `You are an enthusiastic AI assistant. Use the following pieces of context to answer the question at the end.
 If you don't know the answer, just say you don't know. DO NOT try to make up an answer.
@@ -24,7 +31,9 @@ Helpful answer in markdown:`;
 
 function makeChain(
   vectorstore: PineconeStore,
-  writer: WritableStreamDefaultWriter
+  writer: WritableStreamDefaultWriter,
+  translation: boolean,
+  targetLang: string,
 ) {
   // Create encoding to convert token (string) to Uint8Array
   const encoder = new TextEncoder();
@@ -59,7 +68,7 @@ function makeChain(
     streamingModel,
     vectorstore.asRetriever(),
     {
-      qaTemplate: QA_TEMPLATE,
+      qaTemplate: translation ? TRANSLATE_TEMPLATE.replace("{target_lang}", targetLang) : QA_TEMPLATE,
       questionGeneratorTemplate: CONDENSE_TEMPLATE,
       returnSourceDocuments: true, //default 4
       questionGeneratorChainOptions: {
@@ -74,12 +83,16 @@ type callChainArgs = {
   question: string;
   chatHistory: [string, string][];
   transformStream: TransformStream;
+  translation: boolean;
+  targetLang: string;
 };
 
 export async function callChain({
   question,
   chatHistory,
   transformStream,
+  translation,
+  targetLang,
 }: callChainArgs) {
   try {
     // Open AI recommendation
@@ -90,7 +103,7 @@ export async function callChain({
     // Create encoding to convert token (string) to Uint8Array
     const encoder = new TextEncoder();
     const writer = transformStream.writable.getWriter();
-    const chain = makeChain(vectorStore, writer);
+    const chain = makeChain(vectorStore, writer, translation, targetLang);
     const formattedChatHistory = formatChatHistory(chatHistory);
 
     // Question using chat-history
@@ -99,11 +112,12 @@ export async function callChain({
       .call({
         question: sanitizedQuestion,
         chat_history: formattedChatHistory,
+        target_lang: targetLang,
       })
       .then(async (res) => {
         const sourceDocuments = res?.sourceDocuments;
         const firstTwoDocuments = sourceDocuments.slice(0, 2);
-
+        
         const documentInfo = firstTwoDocuments.map(({ pageContent, metadata }: { pageContent: string, metadata: Record<string, any> }) => {
           return {
             pageContent: pageContent,

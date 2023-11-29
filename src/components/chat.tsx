@@ -90,11 +90,11 @@ export function Chat() {
 
           let texts = text.split("tokens-ended");
           if (texts.length > 1) {
-            streamingAIContent = streamingAIContent + texts[1];
+            streamingAIContent = streamingAIContent + texts[0];
             updateStreamingAIContent(streamingAIContent);
           }
           if (texts.length > 2) {
-            sourceDocuments += texts[2];
+            sourceDocuments += texts[1];
           }
         } else if (tokensEnded) {
           sourceDocuments += text;
