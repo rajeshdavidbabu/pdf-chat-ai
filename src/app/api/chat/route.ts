@@ -6,8 +6,8 @@ import { DocumentAssistantManager, getDocumentAssistantManager,initDocumentAssis
 
 
 export async function POST(req: NextRequest) {
-  initDocumentAssistantManager("docs/great-gatsby.pdf", "deep-learning-bishop-pdf")
-  let docassist=await getDocumentAssistantManager()
+  //initDocumentAssistantManager("docs/great-gatsby.pdf", "deep-learning-bishop-pdf")
+  //let docassist=await getDocumentAssistantManager()
   const { question, chatHistory } = await req.json();
 
   if (!question) {

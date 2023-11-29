@@ -8,6 +8,7 @@ import { getChunkedDocsFromPDF } from "@/lib/pdf-loader";
 import { pineconeEmbedAndStore } from "@/lib/vector-store";
 import { getPineconeClient } from "@/lib/pinecone-client";
 
+import { callChain } from "@/lib/langchain";
 
 import { env } from "./config";
 let documentAssistantManagerInstance: DocumentAssistantManager | null = null;
@@ -52,21 +53,40 @@ export async function initDocumentAssistantManager(filePathOrBlob: string | Blob
 
 
 
-export async function getDocumentAssistantManager() {
+export  function getDocumentAssistantManager() {
   return documentAssistantManagerInstance
 }
 
 export class DocumentAssistantAgent {
+  phrase:string;
+  manager:DocumentAssistantManager|null;
+  chatHistory:string[]
+
   //manager: DocumentAssistantManager
   constructor(phrase: string) {
-//this.manager= getDocumentAssistantManager()
+  this.phrase=phrase
+  this.manager=getDocumentAssistantManager()
+  this.chatHistory=[]
   }
 
   getChatHistory(): string[] {
-    return [', ']
+    return this.chatHistory
   }
 
-  askQuestion(question: string) { }
+  askQuestion(question: string) { 
+    this.chatHistory.push(`question: ${question}`);
+    /*
+    this.manager.
+
+    const transformStream = new TransformStream();
+    const readableStream = callChain({
+      question,
+      this.chatHistory,
+      transformStream,
+    });
+    return new Response(await readableStream);
+*/
+  }
 }
 
 
