@@ -103,22 +103,41 @@ export async function callChain({
       .then(async (res) => {
         const sourceDocuments = res?.sourceDocuments;
         const firstTwoDocuments = sourceDocuments.slice(0, 2);
-        // console.log(firstTwoDocuments);
-        // const pageContents = firstTwoDocuments.map(
-        //   ({ pageContent }: { pageContent: string }) => pageContent,
-        //   ({ metadata }: { metadata: JsonObject }) => metadata,
-        // );
-        const stringifiedPageContents = JSON.stringify(firstTwoDocuments);
+
+        const documentInfo = firstTwoDocuments.map(({ pageContent, metadata }: { pageContent: string, metadata: Record<string, any> }) => {
+          return {
+            pageContent: pageContent,
+            line_from: metadata['loc.lines.from'],
+            line_to: metadata['loc.lines.to'],
+            page_no: metadata['loc.pageNumber'],
+          };
+        });
+
+        const stringifiedDocumentInfo = JSON.stringify(documentInfo);
         await writer.ready;
         await writer.write(encoder.encode("tokens-ended"));
+
         // Sending it in the next event-loop
         setTimeout(async () => {
           await writer.ready;
-          await writer.write(encoder.encode(`${stringifiedPageContents}`));
+          await writer.write(encoder.encode(`${stringifiedDocumentInfo}`));
           await writer.close();
         }, 100);
-      });
 
+        // console.log(sourceDocuments)
+        // const pageContents = firstTwoDocuments.map(
+        //   ({ pageContent }: { pageContent: string }) => pageContent
+        // );
+        // const stringifiedPageContents = JSON.stringify(pageContents);
+        // await writer.ready;
+        // await writer.write(encoder.encode("tokens-ended"));
+        // // Sending it in the next event-loop
+        // setTimeout(async () => {
+        //   await writer.ready;
+        //   await writer.write(encoder.encode(`${stringifiedPageContents}`));
+        //   await writer.close();
+        // }, 100);
+      });
     // Return the readable stream
     return transformStream?.readable;
   } catch (e) {

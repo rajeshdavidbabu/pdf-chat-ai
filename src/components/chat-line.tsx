@@ -62,7 +62,7 @@ export function ChatLine({
                     <AccordionTrigger>{`Source ${index + 1}`}</AccordionTrigger>
                     <AccordionContent>
                       <ReactMarkdown linkTarget="_blank">
-                        {sanitizeAndFormatText(source)}
+                        {sanitizeAndFormatText(source.pageContent)}
                       </ReactMarkdown>
                     </AccordionContent>
                   </AccordionItem>
