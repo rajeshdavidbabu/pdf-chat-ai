@@ -5,6 +5,7 @@ import { InputMessage } from "./input-message";
 import { scrollToBottom, initialMessage } from "@/lib/utils";
 import { ChatLine } from "./chat-line";
 import { ChatGPTMessage } from "@/types";
+import { Document } from "langchain/document";
 
 export function Chat() {
   const endpoint = "/api/chat";
@@ -37,8 +38,12 @@ export function Chat() {
     streamingAIContent: string,
     sourceDocuments: string
   ) => {
-    const sources = JSON.parse(sourceDocuments);
+    const sourceContents: Document[] = JSON.parse(sourceDocuments);
+    let sources: string[] = [];
 
+    sourceContents.forEach(element => {
+      sources.push(element.pageContent);
+    });
     // Add the streamed message as the AI response
     // And clear the streamingAIContent state
     updateMessages({
@@ -98,7 +103,7 @@ export function Chat() {
           updateStreamingAIContent(streamingAIContent);
         }
       }
-
+      
       handleStreamEnd(question, streamingAIContent, sourceDocuments);
     } catch (error) {
       console.log("Error occured ", error);
