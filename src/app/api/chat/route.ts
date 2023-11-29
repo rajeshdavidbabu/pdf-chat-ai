@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callChain } from "@/lib/langchain";
+import { DocumentAssistantManager, getDocumentAssistantManager,initDocumentAssistantManager } from "@/lib/document_assistant";
+ 
+
+
 
 export async function POST(req: NextRequest) {
+  initDocumentAssistantManager("docs/great-gatsby.pdf", "deep-learning-bishop-pdf")
+  let docassist=await getDocumentAssistantManager()
   const { question, chatHistory } = await req.json();
 
   if (!question) {
