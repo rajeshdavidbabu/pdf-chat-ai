@@ -1,10 +1,9 @@
 "use client";
 
-import { Component } from "react";
+import React, { Component } from "react";
 
 import {
   PdfLoader,
-  PdfHighlighter,
   AreaHighlight,
   Popup
 } from "react-pdf-highlighter";
@@ -18,6 +17,7 @@ import { Spinner } from "./Spinner";
 import { testHighlights as _testHighlights } from "./test-highlights";
 
 import "./style/App.css";
+import { PdfHighlighter } from "./components/PdfHighlighter";
 
 const testHighlights: Record<string, Array<IHighlight>> = _testHighlights;
 
@@ -68,6 +68,13 @@ class App extends Component<{}, State> {
       highlights: [],
     });
   };
+
+  deleteHighlight = (id: string) => {
+    const highlightsCopy = [...this.state.highlights];
+    this.setState({
+      highlights: highlightsCopy.filter(i => i.id !== id),
+    })
+  }
 
   openDocument = (url: string) => {
     this.setState({
@@ -137,15 +144,15 @@ class App extends Component<{}, State> {
     const { url, highlights } = this.state;
 
     return (
-      <div className="App" style={{ display: "flex", height: "100vh" }}>
+      <div className="App" style={{ display: "flex", height: "100%" }}>
         <Sidebar
           highlights={highlights}
-          resetHighlights={this.resetHighlights}
+          deleteHighlight={this.deleteHighlight}
           onDocumentOpened={this.openDocument}
         />
         <div
           style={{
-            height: "100vh",
+            height: "100%",
             width: "75vw",
             position: "relative",
           }}
@@ -156,7 +163,7 @@ class App extends Component<{}, State> {
                 pdfDocument={pdfDocument}
                 enableAreaSelection={(event) => event.altKey}
                 onScrollChange={resetHash}
-                // pdfScaleValue="page-width"
+                pdfScaleValue="auto"
                 scrollRef={(scrollTo) => {
                   this.scrollViewerTo = scrollTo;
 
