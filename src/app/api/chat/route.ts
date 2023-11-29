@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callChain } from "@/lib/langchain";
-import { DocumentAssistantManager, getDocumentAssistantManager,initDocumentAssistantManager } from "@/lib/document_assistant";
+import { DocumentAssistantManager, getDocumentAssistantManager,initDocumentAssistantManager ,DocumentAssistantAgent,isManagerInited} from "@/lib/document_assistant";
  
 
 
 
 export async function POST(req: NextRequest) {
-  //initDocumentAssistantManager("docs/great-gatsby.pdf", "deep-learning-bishop-pdf")
-  //let docassist=await getDocumentAssistantManager()
+  
   const { question, chatHistory } = await req.json();
 
   if (!question) {
@@ -17,14 +16,13 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const transformStream = new TransformStream();
-    const readableStream = callChain({
-      question,
-      chatHistory,
-      transformStream,
-    });
-
-    return new Response(await readableStream);
+    if (!isManagerInited()){
+      console.log("initing docs")
+      await initDocumentAssistantManager("docs/great-gatsby.pdf", "deep-learning-bishop-pdf")
+    }
+    let docassist=await getDocumentAssistantManager()
+    let agent=new DocumentAssistantAgent("ANNOTATION_TEST");
+    return agent.askQuestion(question);
   } catch (error) {
     console.error("Internal server error ", error);
     return NextResponse.json("Error: Something went wrong. Try again!", {
