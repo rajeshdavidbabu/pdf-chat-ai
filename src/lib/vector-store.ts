@@ -16,7 +16,7 @@ export async function pineconeEmbedAndStore(
     //embed the PDF documents
     await PineconeStore.fromDocuments(docs, embeddings, {
       pineconeIndex: index,
-      namespace: env.PINECONE_NAME_SPACE,
+      // namespace: env.PINECONE_NAME_SPACE,
       textKey: "text",
     });
   } catch (error) {
@@ -33,7 +33,7 @@ export async function getVectorStore(client: PineconeClient) {
     const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
       pineconeIndex: index,
       textKey: "text",
-      namespace: env.PINECONE_NAME_SPACE,
+      // namespace: env.PINECONE_NAME_SPACE,
     });
 
     return vectorStore;
