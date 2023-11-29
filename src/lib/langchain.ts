@@ -123,20 +123,6 @@ export async function callChain({
           await writer.write(encoder.encode(`${stringifiedDocumentInfo}`));
           await writer.close();
         }, 100);
-
-        // console.log(sourceDocuments)
-        // const pageContents = firstTwoDocuments.map(
-        //   ({ pageContent }: { pageContent: string }) => pageContent
-        // );
-        // const stringifiedPageContents = JSON.stringify(pageContents);
-        // await writer.ready;
-        // await writer.write(encoder.encode("tokens-ended"));
-        // // Sending it in the next event-loop
-        // setTimeout(async () => {
-        //   await writer.ready;
-        //   await writer.write(encoder.encode(`${stringifiedPageContents}`));
-        //   await writer.close();
-        // }, 100);
       });
     // Return the readable stream
     return transformStream?.readable;

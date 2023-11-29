@@ -1,6 +1,6 @@
 export type ChatGPTAgent = "user" | "assistant";
 
-type DocumentInfo = {
+export type DocumentInfo = {
   pageContent: string;
   line_from: number;
   line_to: number;

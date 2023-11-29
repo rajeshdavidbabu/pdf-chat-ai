@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { InputMessage } from "./input-message";
 import { scrollToBottom, initialMessage } from "@/lib/utils";
 import { ChatLine } from "./chat-line";
-import { ChatGPTMessage } from "@/types";
+import { ChatGPTMessage, DocumentInfo } from "@/types";
 import { Document } from "langchain/document";
 
 export function Chat() {
@@ -38,11 +38,11 @@ export function Chat() {
     streamingAIContent: string,
     sourceDocuments: string
   ) => {
-    const sourceContents: Document[] = JSON.parse(sourceDocuments);
-    let sources: string[] = [];
+    const sourceContents: DocumentInfo[] = JSON.parse(sourceDocuments);
+    let sources: DocumentInfo[] = [];
 
     sourceContents.forEach(element => {
-      sources.push(element.pageContent);
+      sources.push(element);
     });
     // Add the streamed message as the AI response
     // And clear the streamingAIContent state
