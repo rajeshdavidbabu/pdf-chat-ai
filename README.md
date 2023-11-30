@@ -44,6 +44,15 @@ Built with:
 
 All commands are run from the root of the project, from a terminal:
 
+Before running `npm install`, there're some environment preparations needed. 
+
+| Command               | Action                                          |
+| :-------------------- | :-----------------------------------------------|
+| `nvm use 18`          | Use node version >= 18                           |
+| `brew install pkg-config cairo pango libpng jpeg giflib librsvg`| To install compatible node-canvas versions for Apple Silicon Chip laptop|
+
+After these 2 steps are done, you can start with:
+
 | Command               | Action                                          |
 | :-------------------- | :-----------------------------------------------|
 | `npm install`         | Installs dependencies                           |
