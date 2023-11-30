@@ -66,11 +66,12 @@ function makeChain(
 
   const chain = ConversationalRetrievalQAChain.fromLLM(
     streamingModel,
-    vectorstore.asRetriever(),
+    vectorstore.asRetriever(13),
     {
       qaTemplate: translation ? TRANSLATE_TEMPLATE.replace("{target_lang}", targetLang) : QA_TEMPLATE,
       questionGeneratorTemplate: CONDENSE_TEMPLATE,
       returnSourceDocuments: true, //default 4
+
       questionGeneratorChainOptions: {
         llm: nonStreamingModel,
       },
@@ -122,9 +123,8 @@ export async function callChain({
       })
       .then(async (res) => {
         const sourceDocuments = res?.sourceDocuments;
-        const firstTwoDocuments = sourceDocuments.slice(0, 2);
         
-        const documentInfo = firstTwoDocuments.map(({ pageContent, metadata }: { pageContent: string, metadata: Record<string, any> }) => {
+        const documentInfo = sourceDocuments.map(({ pageContent, metadata }: { pageContent: string, metadata: Record<string, any> }) => {
           return {
             pageContent: pageContent,
             line_from: metadata['loc.lines.from'],
