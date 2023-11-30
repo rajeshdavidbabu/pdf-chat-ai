@@ -1,11 +1,10 @@
 "use client";
 
-import { Component } from "react";
+import React, { Component } from "react";
 
 import {
-  AreaHighlight,
-  PdfHighlighter,
   PdfLoader,
+  AreaHighlight,
   Popup,
 } from "react-pdf-highlighter";
 import { Highlight } from "./components/Highlight";
@@ -18,6 +17,7 @@ import { Spinner } from "./Spinner";
 import { testHighlights as _testHighlights } from "./test-highlights";
 
 import "./style/App.css";
+import { PdfHighlighter } from "./components/PdfHighlighter";
 
 const testHighlights: Record<string, Array<IHighlight>> = _testHighlights;
 
@@ -68,6 +68,13 @@ class PdfDisplayer extends Component<{}, State> {
       highlights: [],
     });
   };
+    
+  deleteHighlight = (id: string) => {
+    const highlightsCopy = [...this.state.highlights];
+    this.setState({
+      highlights: highlightsCopy.filter(i => i.id !== id),
+    })
+  }
 
   handleOpenFile = async (file: File) => {
     const url = URL.createObjectURL(file);
@@ -152,16 +159,16 @@ class PdfDisplayer extends Component<{}, State> {
     const { url, highlights } = this.state;
 
     return (
-      <div className="App" style={{ display: "flex", height: "100vh" }}>
+      <div className="App" style={{ display: "flex", height: "100%" }}>
         <Sidebar
           highlights={highlights}
           resetHighlights={this.resetHighlights}
           onFileOpen={this.handleOpenFile}
-          onUrlOpen={this.handleOpenUrl}
+          deleteHighlight={this.deleteHighlight}
         />
         <div
           style={{
-            height: "100vh",
+            height: "100%",
             width: "75vw",
             position: "relative",
           }}
@@ -172,7 +179,7 @@ class PdfDisplayer extends Component<{}, State> {
                 pdfDocument={pdfDocument}
                 enableAreaSelection={(event) => event.altKey}
                 onScrollChange={resetHash}
-                // pdfScaleValue="page-width"
+                pdfScaleValue="auto"
                 scrollRef={(scrollTo) => {
                   this.scrollViewerTo = scrollTo;
 

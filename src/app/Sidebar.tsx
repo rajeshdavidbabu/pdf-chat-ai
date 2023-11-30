@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import type { IHighlight } from "react-pdf-highlighter";
+import { PdfContext } from "./page";
 
 interface Props {
   highlights: Array<IHighlight>;
   resetHighlights: () => void;
   onFileOpen?: (file: File) => void;
+  deleteHighlight: (id: string) => void;
 }
 
 const updateHash = (highlight: IHighlight) => {
@@ -16,9 +18,11 @@ declare const APP_VERSION: string;
 export function Sidebar({
   highlights,
   resetHighlights,
+  deleteHighlight,
   onFileOpen,
 }: Props): React.ReactElement {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const { setFileName } = useContext(PdfContext);
 
   const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -35,19 +39,33 @@ export function Sidebar({
   }, [selectedFile]);
 
   return (
-    <div className="sidebar" style={{ width: "25vw" }}>
-      <div style={{ padding: "1rem" }}>
-        <input type="file" onChange={handleFileSelection} />
+    <div className="sidebar" style={{ width: "20vw" }}>
+      <div>
+        <input
+          className="hidden"
+          id="upload-pdf-input"
+          type="file"
+          accept=".pdf"
+          onChange={handleFileSelection}
+        />
       </div>
-      {highlights.length > 0 ? (
+      {/* {highlights.length > 0 ? (
         <div style={{ padding: "1rem" }}>
           <button onClick={resetHighlights}>Reset highlights</button>
         </div>
+      ) : null} */}
+      {highlights.length > 0 ? (
+        <div
+          className="p-4 font-bold text-xl sticky top-0 z-50 w-full"
+          style={{ backgroundColor: "rgba(var(--semi-grey-0), 1)" }}
+        >
+          Annotations
+        </div>
       ) : null}
 
-      <ul className="sidebar__highlights">
+      <div className="sidebar__highlights">
         {highlights.map((highlight, index) => (
-          <li
+          <div
             key={index}
             className="sidebar__highlight"
             onClick={() => {
@@ -71,11 +89,18 @@ export function Sidebar({
               ) : null}
             </div>
             <div className="highlight__location">
+              <div
+                className="relative top-3"
+                style={{ color: "rgba(var(--semi-grey-4), 1)" }}
+                onClick={() => deleteHighlight(highlight.id)}
+              >
+                Delete
+              </div>
               Page {highlight.position.pageNumber}
             </div>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

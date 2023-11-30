@@ -22,6 +22,7 @@
     "@types/node": "20.4.9",
     "@types/react": "18.2.19",
     "@types/react-dom": "18.2.7",
+    "ahooks": "^3.7.8",
     "autoprefixer": "10.4.14",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
@@ -47,6 +48,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
     "@types/pdf-parse": "^1.1.1",
     "tsx": "^3.12.7"
   }

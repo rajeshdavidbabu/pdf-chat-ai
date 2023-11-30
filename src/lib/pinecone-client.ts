@@ -3,7 +3,7 @@ import { env } from "./config";
 import { delay } from "./utils";
 
 let pineconeClientInstance: PineconeClient | null = null;
-
+export let createdIndex: boolean=false;
 async function createIndex(client: PineconeClient, indexName: string) {
   try {
     await client.createIndex({
@@ -46,17 +46,25 @@ export async function initPineconeClient(filePath: string) {
     let existingIndexes = await pineconeClient.listIndexes();
     console.log("original indexes  are =",existingIndexes)
 
-    if (existingIndexes.length>0) {
+    if (existingIndexes.length>0 && existingIndexes[0]!=filePath) {
+      createdIndex=false
       console.log("Your index already exists removing and resetting");
       await deleteIndex(pineconeClient,existingIndexes[0]);
 
      existingIndexes = await pineconeClient.listIndexes();
      console.log("indexes after delete are =",existingIndexes)
-    } 
+     
+    } else if (existingIndexes.length>0 && existingIndexes[0]==filePath){
+      createdIndex=false
+      console.log("same index, no need to create more =",existingIndexes)
+    }
+
+    if (existingIndexes.length==0){
+      createdIndex=true
+      await createIndex(pineconeClient,filePath)
+    }
 
 
-
-    await createIndex(pineconeClient, filePath);
     
     existingIndexes = await pineconeClient.listIndexes();
 

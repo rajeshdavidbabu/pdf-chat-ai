@@ -8,23 +8,19 @@ body {
   }
   
   .sidebar {
-    overflow: auto;
-    color: rgb(119, 119, 119);
-    background: linear-gradient(
-      rgb(249, 248, 247),
-      rgb(251, 250, 248) 46px,
-      rgb(251, 251, 249) 120px,
-      rgb(248, 247, 245) 35%,
-      rgb(249, 248, 246)
-    );
+    overflow-y: auto;
+    overflow-x: hidden;
+    color: black;
   }
   
   .sidebar__highlights {
-    list-style: "none";
+    overflow-x: visible;
     padding: 0;
   }
   
   .highlight__location {
+    display: flex;
+    justify-content: space-between;
     margin-top: 0.5rem;
     text-align: right;
     font-size: 10px;
@@ -32,19 +28,29 @@ body {
   
   .highlight__image {
     overflow: auto;
-    max-width: 300px;
+    max-width: 260px;
     border: 1px dashed;
   }
   
   .sidebar__highlight {
-    padding: 1rem;
+    position: relative;
+    left: 0;
+    margin: 8px 0;
+    width: 100%;
+    padding: 1.5rem;
     cursor: pointer;
-    transition: background 140ms ease-in;
-    border-bottom: 1px solid rgb(119, 119, 119);
+    border-radius: 0;
+    background-color: white;
+    transition: 120ms ease-in-out;
   }
-  
+
   .sidebar__highlight:hover {
+    position: relative;
+    left: 4px;
+    scale: 1.01;
     background: rgba(58, 56, 52, 0.08);
+    transition: 220ms ease-in-out;
+
   }
   
   a {

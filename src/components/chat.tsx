@@ -7,7 +7,7 @@ import { ChatLine } from "./chat-line";
 import { ChatGPTMessage, DocumentInfo } from "@/types";
 import { Document } from "langchain/document";
 import { PdfContext } from "@/app/page";
-import { Input } from '@douyinfe/semi-ui';
+import { Button, Input } from "@douyinfe/semi-ui";
 
 export const Chat = () => {
   const endpoint = "/api/chat";
@@ -18,7 +18,8 @@ export const Chat = () => {
   const [streamingAIContent, setStreamingAIContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const { selectedText } = useContext(PdfContext);
-  console.log('selectedText: ', selectedText);
+  const [userQuestion, setUserQuestion] = useState("");
+  console.log("selectedText: ", selectedText);
 
   const updateMessages = (message: ChatGPTMessage) => {
     setMessages((previousMessages) => [...previousMessages, message]);
@@ -45,7 +46,7 @@ export const Chat = () => {
     const sourceContents: DocumentInfo[] = JSON.parse(sourceDocuments);
     let sources: DocumentInfo[] = [];
 
-    sourceContents.forEach(element => {
+    sourceContents.forEach((element) => {
       sources.push(element);
     });
     // Add the streamed message as the AI response
@@ -87,7 +88,7 @@ export const Chat = () => {
         if (done) {
           break;
         }
-        
+
         const text = new TextDecoder().decode(value);
         if (text.includes("tokens-ended") && !tokensEnded) {
           tokensEnded = true;
@@ -107,7 +108,7 @@ export const Chat = () => {
           updateStreamingAIContent(streamingAIContent);
         }
       }
-      
+
       handleStreamEnd(question, streamingAIContent, sourceDocuments);
     } catch (error) {
       console.log("Error occured ", error);
@@ -123,7 +124,15 @@ export const Chat = () => {
   }
 
   return (
-    <div className='fixed right-3 p-3' style={{ borderRadius: 18, width: '20vw', backgroundColor: 'white' }}>
+    <div
+      className="fixed right-3 top-2 p-3 overflow-y-auto"
+      style={{
+        borderRadius: 18,
+        width: "20vw",
+        backgroundColor: "white",
+        maxHeight: "90vh",
+      }}
+    >
       <div ref={containerRef}>
         {messages.map(({ content, role, sources }, index) => (
           <ChatLine
@@ -147,8 +156,17 @@ export const Chat = () => {
         placeholder={placeholder}
         isLoading={isLoading}
       /> */}
-      <div className='text-black'>{selectedText}</div>
-      <Input />
+      <div className="text-black">{selectedText}</div>
+      <Input value={userQuestion} onChange={setUserQuestion} />
+      <div className="flex justify-end mt-1">
+        <Button
+          theme="solid"
+          type="primary"
+          onClick={() => sendQuestion(`${selectedText} ${userQuestion}`)}
+        >
+          Send
+        </Button>
+      </div>
     </div>
   );
-}
+};

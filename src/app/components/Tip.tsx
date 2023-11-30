@@ -42,17 +42,18 @@ const Tip = ({ onConfirm, onOpen, onUpdate }: TipProps) => {
 
   const { compact, text, emoji } = state;
 
+  const onClickAction = () => {
+    setShowChat && setShowChat(true);
+    setSelectedText &&
+      setSelectedText(window.getSelection()?.toString() || "");
+    onOpen();
+    setState((prevState) => ({ ...prevState, compact: false }));
+  };
+
   return (
     <div className="Tip">
       <div
         className="Tip__compact"
-        onClick={() => {
-          setShowChat && setShowChat(true);
-          setSelectedText &&
-            setSelectedText(window.getSelection()?.toString() || "");
-          onOpen();
-          setState((prevState) => ({ ...prevState, compact: false }));
-        }}
       >
         <Button
           theme="borderless"
@@ -60,15 +61,21 @@ const Tip = ({ onConfirm, onOpen, onUpdate }: TipProps) => {
           size="small"
           icon={<IconLanguage />}
           className="mr-1"
-          onClick={() => setAiMode?.('translation')}
-        ></Button>
+          onClick={() => {
+            onClickAction();
+            setAiMode && setAiMode('translation');
+          }}
+        />
         <Button
           theme="borderless"
           type="tertiary"
           size="small"
           icon={<IconCustomerSupport />}
-          onClick={() => setAiMode?.('chat')}
-        ></Button>
+          onClick={() => {
+            onClickAction();
+            setAiMode && setAiMode('chat');
+          }}
+        />
       </div>
     </div>
   );
