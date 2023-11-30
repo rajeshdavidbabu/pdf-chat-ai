@@ -15,6 +15,7 @@ type callQueryArgs = {
 
 const QA_TEMPLATE = (language: string, question: string) => `Please translate this into ${language}.
   Content: ${question}
+  Just show the answer. no any other words like: "sure", "okay" etc.
   Helpful answer in markdown:`;
   
 
