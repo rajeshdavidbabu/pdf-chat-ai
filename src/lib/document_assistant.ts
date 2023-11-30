@@ -40,6 +40,7 @@ export class DocumentAssistantManager {
     } catch (error) {
       console.error("Init client script failed ", error);
     }
+
   }
 }
 

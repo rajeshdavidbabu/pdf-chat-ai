@@ -7,7 +7,6 @@ import { error } from "console";
 
 
 export async function POST(req: NextRequest) {
-  let docassist = await getDocumentAssistantManager()
   const { question, chatHistory, translation, targetLang } = await req.json();
   if (!question) {
     return NextResponse.json("Error: No question in the request", {
