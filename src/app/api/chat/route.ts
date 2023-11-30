@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { callChain } from "@/lib/langchain";
 
 export async function POST(req: NextRequest) {
-  const { question, chatHistory, translation, targetLang } = await req.json();
+  const { question, chatHistory, translation, targetLang, indexKey } = await req.json();
 
   if (!question) {
     return NextResponse.json("Error: No question in the request", {
@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
       transformStream,
       translation: translation || question.includes("translate"),
       targetLang: targetLang || "Chinese", 
+      indexKey:indexKey||"a",
     });
 
     return new Response(await readableStream);

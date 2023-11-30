@@ -85,6 +85,7 @@ type callChainArgs = {
   transformStream: TransformStream;
   translation: boolean;
   targetLang: string;
+  indexKey:string;
 };
 
 export async function callChain({
@@ -93,12 +94,13 @@ export async function callChain({
   transformStream,
   translation,
   targetLang,
+  indexKey,
 }: callChainArgs) {
   try {
     // Open AI recommendation
     const sanitizedQuestion = question.trim().replaceAll("\n", " ");
-    const pineconeClient = await getPineconeClient();
-    const vectorStore = await getVectorStore(pineconeClient);
+    const pineconeClient = await getPineconeClient(indexKey);
+    const vectorStore = await getVectorStore(pineconeClient,indexKey);
 
     // Create encoding to convert token (string) to Uint8Array
     const encoder = new TextEncoder();
