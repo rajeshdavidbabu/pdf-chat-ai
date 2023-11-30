@@ -84,7 +84,7 @@ class PdfDisplayer extends Component<{}, State> {
       url: url,
       highlights: testHighlights[url] ? [...testHighlights[url]] : [],
     });
-    const key = file.name.replace(/[^a-zA-Z0-9]/g, '');
+    const key = file.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
     const formData = new FormData();
     formData.append('file', file);
     formData.append('key', key);

@@ -34,7 +34,7 @@ export function Sidebar({
     }
     console.log(selectedFile);
     setFileName?.(selectedFile.name);
-    const key = selectedFile.name.replace(/[^a-zA-Z0-9]/g, '');
+    const key = selectedFile.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
     setIndexKey?.(key)
     onFileOpen?.(selectedFile);
   }, [selectedFile]);
