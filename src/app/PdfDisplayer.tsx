@@ -10,7 +10,7 @@ import {
 import { Highlight } from "./components/Highlight";
 import Tip from "./components/Tip";
 
-import type { IHighlight, NewHighlight } from "react-pdf-highlighter";
+// import type { IHighlight, NewHighlight } from "react-pdf-highlighter";
 
 import { Sidebar } from "./Sidebar";
 import { Spinner } from "./Spinner";
@@ -18,8 +18,8 @@ import { testHighlights as _testHighlights } from "./test-highlights";
 
 import "./style/App.css";
 import { PdfHighlighter } from "./components/PdfHighlighter";
-
 import { PdfContext } from "./page";
+import { IHighlight, NewHighlight } from "./types/types";
 
 const testHighlights: Record<string, Array<IHighlight>> = _testHighlights;
 
@@ -57,7 +57,12 @@ const searchParams = new URLSearchParams(document.location.search);
 
 const initialUrl = searchParams.get("url") || PRIMARY_PDF_URL;
 
-class PdfDisplayer extends Component<{}, State> {
+class PdfDisplayer extends Component<{
+  highlights: IHighlight[],
+  setHighlights: React.Dispatch<React.SetStateAction<IHighlight[]>>,
+  setSelectedHighlight: React.Dispatch<React.SetStateAction<IHighlight | undefined>>,
+  addHighlight?: ((highlight: NewHighlight) => void) | undefined,
+}, State> {
   state = {
     url: initialUrl,
     highlights: testHighlights[initialUrl]
@@ -123,16 +128,6 @@ class PdfDisplayer extends Component<{}, State> {
     return highlights.find((highlight) => highlight.id === id);
   }
 
-  addHighlight(highlight: NewHighlight) {
-    const { highlights } = this.state;
-
-    console.log("Saving highlight", highlight);
-
-    this.setState({
-      highlights: [{ ...highlight, id: getNextId() }, ...highlights],
-    });
-  }
-
   updateHighlight(highlightId: string, position: Object, content: Object) {
     console.log("Updating highlight", highlightId, position, content);
 
@@ -157,12 +152,13 @@ class PdfDisplayer extends Component<{}, State> {
   }
 
   render() {
-    const { url, highlights } = this.state;
+    const { url } = this.state;
+    const { highlights, setHighlights, setSelectedHighlight } = this.props;
 
     return (
       <div className="App" style={{ display: "flex", height: "100%" }}>
         <Sidebar
-          highlights={highlights}
+          highlights={highlights.filter(h => h.isSaved) || []}
           deleteHighlight={this.deleteHighlight}
           onFileOpen={this.handleOpenFile}
         />
@@ -194,8 +190,8 @@ class PdfDisplayer extends Component<{}, State> {
                   <Tip
                     onOpen={transformSelection}
                     onConfirm={(comment) => {
-                      this.addHighlight({ content, position, comment });
-
+                      const tempHighlight = { content, position, comment };
+                      this.props.addHighlight?.(tempHighlight);
                       hideTipAndSelection();
                     }}
                   />

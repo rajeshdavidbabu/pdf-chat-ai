@@ -47,6 +47,10 @@ const Tip = ({ onConfirm, onOpen, onUpdate }: TipProps) => {
     setShowChat?.(true);
     setSelectedText?.(window.getSelection()?.toString() || "");
     onOpen();
+    onConfirm({
+      text: '',
+      emoji: '',
+    });
     setState((prevState) => ({ ...prevState, compact: false }));
   };
 

@@ -37,6 +37,7 @@ export function Sidebar({
     const key = selectedFile.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
     setIndexKey?.(key)
     onFileOpen?.(selectedFile);
+    localStorage.setItem('fileName', selectedFile.name);
   }, [selectedFile]);
 
   return (
@@ -74,13 +75,13 @@ export function Sidebar({
             }}
           >
             <div>
-              <strong>{highlight.comment.text}</strong>
-              {highlight.content.text ? (
+              <strong>{highlight?.comment?.text}</strong>
+              {highlight?.content?.text ? (
                 <blockquote style={{ marginTop: "0.5rem" }}>
                   {`${highlight.content.text.slice(0, 90).trim()}…`}
                 </blockquote>
               ) : null}
-              {highlight.content.image ? (
+              {highlight?.content?.image ? (
                 <div
                   className="highlight__image"
                   style={{ marginTop: "0.5rem" }}
@@ -97,7 +98,7 @@ export function Sidebar({
               >
                 Delete
               </div>
-              Page {highlight.position.pageNumber}
+              Page {highlight?.position?.pageNumber}
             </div>
           </div>
         ))}

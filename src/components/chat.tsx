@@ -9,14 +9,45 @@ import { Document } from "langchain/document";
 import { PdfContext } from "@/app/page";
 import { Button, Input, TextArea } from "@douyinfe/semi-ui";
 import "./chat.css";
+import { IHighlight } from "@/app/types/types";
 
-const aiModeToEndpoint = {
-  'translate': "/api/translate",
-  'chat': "/api/chat"
+interface ITempChat {
+  selectedText: string;
+  chatHistory: [string, string][];
 }
 
+export interface History {
+  highlightId: string;
+  chatHistory: [string, string][];
+  highlight: IHighlight;
+}
+
+export interface FileStorage {
+  fileName: string;
+  histories: History[];
+}
+export interface ChatStorage {
+  files: FileStorage[];
+}
+
+const aiModeToEndpoint = {
+  translate: "/api/translate",
+  chat: "/api/chat",
+};
+
 export const Chat = () => {
-  const { indexKey, selectedText, aiMode } = useContext(PdfContext);
+  const {
+    addHighlight,
+    setHighlights,
+    selectedHighlight,
+    highlights,
+    fileName,
+    storage,
+    indexKey,
+    selectedText,
+    aiMode,
+  } = useContext(PdfContext);
+  const endpoint = "/api/chat";
   const [input, setInput] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [messages, setMessages] = useState<ChatGPTMessage[]>(initialMessage);
@@ -24,6 +55,48 @@ export const Chat = () => {
   const [streamingAIContent, setStreamingAIContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [userQuestion, setUserQuestion] = useState("");
+  const [currHighlightId, setCurrHighlightId] = useState<string>("");
+
+  console.log("chatHistory: ", chatHistory);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      const id = hash.split("-")[1];
+      setCurrHighlightId(id);
+    };
+
+    handleHashChange();
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, [fileName]);
+
+  
+  useEffect(() => {
+    console.log('storage: ', storage
+    .find((s) => s.fileName === localStorage.getItem("fileName") || "")
+    ?.histories);
+    const chatHistory = storage
+    .find((s) => s.fileName === localStorage.getItem("fileName") || "")
+    ?.histories.find((h) => h.highlightId === currHighlightId)?.chatHistory ||
+    [];
+    setChatHistory(chatHistory);
+    const msgList: ChatGPTMessage[] = [];
+    chatHistory.forEach(item => {
+      msgList.push({
+        role: 'user',
+        content: item[0],
+      });
+      msgList.push({
+        role: 'assistant',
+        content: item[1],
+      });
+    });
+    setMessages(msgList);
+  }, [currHighlightId]);
 
   const updateMessages = (message: ChatGPTMessage) => {
     setMessages((previousMessages) => [...previousMessages, message]);
@@ -42,12 +115,24 @@ export const Chat = () => {
     setTimeout(() => scrollToBottom(containerRef), 100);
   };
 
+  useEffect(() => {
+    if (!isLoading) {
+      localStorage.setItem(
+        "tempChat",
+        JSON.stringify({
+          selectedText,
+          chatHistory,
+        })
+      );
+    }
+  }, [isLoading]);
+
   const handleStreamEnd = (
     question: string,
     streamingAIContent: string,
     sourceDocuments: string
   ) => {
-    let sourceContents: DocumentInfo[] = [] 
+    let sourceContents: DocumentInfo[] = [];
     if (sourceDocuments) {
       sourceContents = JSON.parse(sourceDocuments);
     }
@@ -68,11 +153,17 @@ export const Chat = () => {
   };
 
   // send message to API /api/chat endpoint
-  const sendQuestion = async (question: string, aiMode: 'translate' | 'chat' = "chat") => {
+  const sendQuestion = async (
+    question: string,
+    aiMode: "translate" | "chat" = "chat"
+  ) => {
     const endpoint = aiModeToEndpoint[aiMode];
 
     setIsLoading(true);
-    updateMessages({ role: "user", content:  aiMode === "translate" ? `Translate ${question}` : question });
+    updateMessages({
+      role: "user",
+      content: aiMode === "translate" ? `Translate ${question}` : question,
+    });
 
     try {
       const response = await fetch(endpoint, {
@@ -84,7 +175,7 @@ export const Chat = () => {
           question,
           chatHistory,
           indexKey,
-          ...(aiMode === "translate" && { language: "Chinese" })
+          ...(aiMode === "translate" && { language: "Chinese" }),
         }),
       });
 
@@ -128,10 +219,77 @@ export const Chat = () => {
   };
 
   useEffect(() => {
-    if (aiMode === 'translate' && selectedText !== "") {
-      sendQuestion(selectedText, 'translate');
+    if (aiMode === "translate" && selectedText !== "") {
+      sendQuestion(selectedText, "translate");
     }
-  }, [aiMode, selectedText])
+  }, [aiMode, selectedText]);
+
+  const saveCurrChat = () => {
+    const highlightsCopy = [...highlights];
+    const index = highlightsCopy.findIndex(
+      (h) => h.id === selectedHighlight?.id
+    );
+    console.log("selectedHighlight: ", selectedHighlight);
+    highlightsCopy[index] = {
+      ...highlightsCopy[index],
+      isSaved: true,
+    };
+    console.log("highlightsCopy: ", highlightsCopy);
+    setHighlights && setHighlights(highlightsCopy);
+
+    let storage: FileStorage[] = [];
+    if (localStorage.getItem("chatStorage")) {
+      storage = JSON.parse(
+        localStorage.getItem("chatStorage") || "[]"
+      ) as FileStorage[];
+    }
+    const currFileStorage: FileStorage = storage.find(
+      (i) => i.fileName === localStorage.getItem("fileName")
+    ) || {
+      fileName: localStorage.getItem("fileName") || "",
+      histories: [],
+    };
+    const historyItemIndex =
+      currFileStorage?.histories.findIndex(
+        (h) => h.highlightId === selectedHighlight?.id
+      ) || -1;
+    const newHistoryItem: History = {
+      highlight: { ...selectedHighlight, isSaved: true } as IHighlight,
+      highlightId: selectedHighlight?.id || "",
+      chatHistory,
+    };
+    if (historyItemIndex >= 0 && currFileStorage?.histories) {
+      currFileStorage.histories[historyItemIndex] = newHistoryItem;
+    } else {
+      currFileStorage?.histories.push(newHistoryItem);
+    }
+    console.log("currFileStorage: ", currFileStorage);
+    if (currFileStorage) {
+      const fileStorageIndex = storage.findIndex(
+        (i) => i.fileName === localStorage.getItem("fileName")
+      );
+      if (fileStorageIndex >= 0) {
+        storage[
+          storage.findIndex(
+            (i) => i.fileName === localStorage.getItem("fileName")
+          )
+        ] = currFileStorage;
+      } else {
+        storage.push(currFileStorage);
+      }
+      console.log("storage: ", storage);
+    }
+    localStorage.setItem("chatStorage", JSON.stringify(storage));
+  };
+
+  useEffect(() => {
+    let storage: FileStorage[] = [];
+    if (localStorage.getItem("chatStorage")) {
+      storage = JSON.parse(
+        localStorage.getItem("chatStorage") || "[]"
+      ) as FileStorage[];
+    }
+  }, [highlights]);
 
   let placeholder = "Type a message to start ...";
 
@@ -189,9 +347,17 @@ export const Chat = () => {
           }}
         />
         <div className="flex justify-end mt-2">
-          <Button className="save-annotation" theme="borderless" type="primary" style={{ marginRight: 8, color: 'black' }}>
-            Save as annotation
-          </Button>
+          {selectedHighlight?.position ? (
+            <Button
+              className="save-annotation"
+              theme="borderless"
+              type="primary"
+              style={{ marginRight: 8, color: "black" }}
+              onClick={saveCurrChat}
+            >
+              Save as annotation
+            </Button>
+          ) : null}
           <Button
             theme="solid"
             type="primary"
@@ -201,6 +367,7 @@ export const Chat = () => {
                 setUserQuestion("");
               }, 50);
             }}
+            disabled={isLoading}
             style={{ backgroundColor: "black", color: "white" }}
           >
             Send

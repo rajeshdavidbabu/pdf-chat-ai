@@ -218,10 +218,12 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
     const pageNumbers = new Set<number>();
     for (const highlight of allHighlights) {
-      pageNumbers.add(highlight!.position.pageNumber);
-      for (const rect of highlight!.position.rects) {
-        if (rect.pageNumber) {
-          pageNumbers.add(rect.pageNumber);
+      pageNumbers.add(highlight!.position?.pageNumber);
+      if (highlight!.position?.rects) {
+        for (const rect of highlight!.position.rects) {
+          if (rect.pageNumber) {
+            pageNumbers.add(rect?.pageNumber);
+          }
         }
       }
     }

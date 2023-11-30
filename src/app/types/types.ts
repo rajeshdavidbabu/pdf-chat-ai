@@ -52,8 +52,12 @@ export interface LTWH {
   export interface HighlightComment {
     comment: Comment;
   }
+
+  export interface HighlightStatus {
+    isSaved?: boolean;
+  }
   
-  export interface NewHighlight extends HighlightContent, HighlightComment {
+  export interface NewHighlight extends HighlightContent, HighlightComment, HighlightStatus {
     position: ScaledPosition;
   }
   
