@@ -1,12 +1,57 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { InputMessage } from "./input-message";
 import { scrollToBottom, initialMessage } from "@/lib/utils";
 import { ChatLine } from "./chat-line";
-import { ChatGPTMessage } from "@/types";
+import { ChatGPTMessage, DocumentInfo } from "@/types";
+import { Document } from "langchain/document";
+import { PdfContext } from "@/app/page";
+import { Button, Input, TextArea, Typography } from "@douyinfe/semi-ui";
+import "./chat.css";
+import { IHighlight } from "@/app/types/types";
 
-export function Chat() {
+interface ITempChat {
+  selectedText: string;
+  chatHistory: [string, string][];
+}
+
+export interface History {
+  highlightId: string;
+  chatHistory: [string, string][];
+  highlight: IHighlight;
+}
+
+export interface FileStorage {
+  fileName: string;
+  histories: History[];
+}
+export interface ChatStorage {
+  files: FileStorage[];
+}
+
+const aiModeToEndpoint = {
+  translate: "/api/translate",
+  chat: "/api/chat",
+};
+
+export const Chat = () => {
+  const { Paragraph } = Typography;
+  const {
+    addHighlight,
+    setHighlights,
+    selectedHighlight,
+    highlights,
+    fileName,
+    storage,
+    indexKey,
+    selectedText,
+    aiMode,
+    summary,
+    isAIBusy,
+    setIsAIBusy,
+    showChat,
+  } = useContext(PdfContext);
   const endpoint = "/api/chat";
   const [input, setInput] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -14,10 +59,50 @@ export function Chat() {
   const [chatHistory, setChatHistory] = useState<[string, string][]>([]);
   const [streamingAIContent, setStreamingAIContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [userQuestion, setUserQuestion] = useState("");
+  const [currHighlightId, setCurrHighlightId] = useState<string>("");
+
+  console.log("chatHistory: ", chatHistory);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      const id = hash.split("-")[1];
+      setCurrHighlightId(id);
+    };
+
+    handleHashChange();
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, [fileName]);
+
+  useEffect(() => {
+    const chatHistory =
+      storage
+        .find((s) => s.fileName === localStorage.getItem("fileName") || "")
+        ?.histories.find((h) => h.highlightId === currHighlightId)
+        ?.chatHistory || [];
+    setChatHistory(chatHistory);
+    const msgList: ChatGPTMessage[] = [];
+    chatHistory.forEach((item) => {
+      msgList.push({
+        role: "user",
+        content: item[0],
+      });
+      msgList.push({
+        role: "assistant",
+        content: item[1],
+      });
+    });
+    setMessages(msgList);
+  }, [currHighlightId]);
 
   const updateMessages = (message: ChatGPTMessage) => {
     setMessages((previousMessages) => [...previousMessages, message]);
-    setTimeout(() => scrollToBottom(containerRef), 100);
+    setTimeout(() => scrollToBottom(containerRef), 50);
   };
 
   const updateChatHistory = (question: string, answer: string) => {
@@ -29,16 +114,44 @@ export function Chat() {
 
   const updateStreamingAIContent = (streamingAIContent: string) => {
     setStreamingAIContent(streamingAIContent);
-    setTimeout(() => scrollToBottom(containerRef), 100);
+    setTimeout(() => scrollToBottom(containerRef), 50);
   };
+
+  useEffect(() => {
+    if (!isLoading) {
+      localStorage.setItem(
+        "tempChat",
+        JSON.stringify({
+          selectedText,
+          chatHistory,
+        })
+      );
+    }
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (showChat) {
+      setTimeout(() => {
+        (document.querySelector('#chat-box') as HTMLElement).focus();
+      }, 500);
+
+    }
+  }, [showChat]);
 
   const handleStreamEnd = (
     question: string,
     streamingAIContent: string,
     sourceDocuments: string
   ) => {
-    const sources = JSON.parse(sourceDocuments);
+    let sourceContents: DocumentInfo[] = [];
+    if (sourceDocuments) {
+      sourceContents = JSON.parse(sourceDocuments);
+    }
+    let sources: DocumentInfo[] = [];
 
+    sourceContents.forEach((element) => {
+      sources.push(element);
+    });
     // Add the streamed message as the AI response
     // And clear the streamingAIContent state
     updateMessages({
@@ -51,9 +164,17 @@ export function Chat() {
   };
 
   // send message to API /api/chat endpoint
-  const sendQuestion = async (question: string) => {
+  const sendQuestion = async (
+    question: string,
+    aiMode: "translate" | "chat" = "chat"
+  ) => {
+    const endpoint = aiModeToEndpoint[aiMode];
+
     setIsLoading(true);
-    updateMessages({ role: "user", content: question });
+    updateMessages({
+      role: "user",
+      content: aiMode === "translate" ? `Translate ${question}` : question,
+    });
 
     try {
       const response = await fetch(endpoint, {
@@ -63,7 +184,10 @@ export function Chat() {
         },
         body: JSON.stringify({
           question,
+          phrase: selectedHighlight?.content.text,
           chatHistory,
+          indexKey,
+          ...(aiMode === "translate" && { language: "Chinese" }),
         }),
       });
 
@@ -80,16 +204,24 @@ export function Chat() {
         }
 
         const text = new TextDecoder().decode(value);
-        if (text === "tokens-ended" && !tokensEnded) {
+        if (text.includes("tokens-ended") && !tokensEnded) {
           tokensEnded = true;
+
+          let texts = text.split("tokens-ended");
+          if (texts.length > 1) {
+            streamingAIContent = streamingAIContent + texts[0];
+            updateStreamingAIContent(streamingAIContent);
+          }
+          if (texts.length > 2) {
+            sourceDocuments += texts[1];
+          }
         } else if (tokensEnded) {
-          sourceDocuments = text;
+          sourceDocuments += text;
         } else {
           streamingAIContent = streamingAIContent + text;
           updateStreamingAIContent(streamingAIContent);
         }
       }
-
       handleStreamEnd(question, streamingAIContent, sourceDocuments);
     } catch (error) {
       console.log("Error occured ", error);
@@ -98,15 +230,131 @@ export function Chat() {
     }
   };
 
+  useEffect(() => {
+    if (aiMode === "translate" && selectedText !== "") {
+      sendQuestion(selectedText, "translate");
+    }
+  }, [aiMode, selectedText]);
+
+  useEffect(() => {
+    if (summary !== "") {
+      updateMessages({
+        role: "assistant",
+        content: "Summary:\n" + summary,
+      });
+    }
+  }, [summary]);
+
+  useEffect(() => {
+    if (!isLoading && chatHistory.length) {
+      setTimeout(() => {
+        saveCurrChat();
+      }, 500);
+    }
+  }, [chatHistory, isLoading]);
+
+  const saveCurrChat = () => {
+    const highlightsCopy = [...highlights];
+    const index = highlightsCopy.findIndex(
+      (h) => h.id === selectedHighlight?.id
+    );
+    console.log("selectedHighlight: ", selectedHighlight);
+    highlightsCopy[index] = {
+      ...highlightsCopy[index],
+      isSaved: true,
+    };
+    console.log("highlightsCopy: ", highlightsCopy);
+    setHighlights && setHighlights(highlightsCopy);
+
+    let storage: FileStorage[] = [];
+    if (localStorage.getItem("chatStorage")) {
+      storage = JSON.parse(
+        localStorage.getItem("chatStorage") || "[]"
+      ) as FileStorage[];
+    }
+    const currFileStorage: FileStorage = storage.find(
+      (i) => i.fileName === localStorage.getItem("fileName")
+    ) || {
+      fileName: localStorage.getItem("fileName") || "",
+      histories: [],
+    };
+    const historyItemIndex =
+      currFileStorage?.histories.findIndex(
+        (h) => h.highlightId === selectedHighlight?.id
+      ) || -1;
+    const newHistoryItem: History = {
+      highlight: { ...selectedHighlight, isSaved: true } as IHighlight,
+      highlightId: selectedHighlight?.id || "",
+      chatHistory,
+    };
+    if (historyItemIndex >= 0 && currFileStorage?.histories) {
+      currFileStorage.histories[historyItemIndex] = newHistoryItem;
+    } else {
+      currFileStorage?.histories.push(newHistoryItem);
+    }
+    console.log("currFileStorage: ", currFileStorage);
+    if (currFileStorage) {
+      const fileStorageIndex = storage.findIndex(
+        (i) => i.fileName === localStorage.getItem("fileName")
+      );
+      if (fileStorageIndex >= 0) {
+        storage[
+          storage.findIndex(
+            (i) => i.fileName === localStorage.getItem("fileName")
+          )
+        ] = currFileStorage;
+      } else {
+        storage.push(currFileStorage);
+      }
+      console.log("storage: ", storage);
+    }
+    localStorage.setItem("chatStorage", JSON.stringify(storage));
+  };
+
+  useEffect(() => {
+    let storage: FileStorage[] = [];
+    if (localStorage.getItem("chatStorage")) {
+      storage = JSON.parse(
+        localStorage.getItem("chatStorage") || "[]"
+      ) as FileStorage[];
+    }
+  }, [highlights]);
+
   let placeholder = "Type a message to start ...";
 
   if (messages.length > 2) {
     placeholder = "Type to continue your conversation";
   }
+  console.log("messages: ", messages);
 
   return (
-    <div className="rounded-2xl border h-[75vh] flex flex-col justify-between">
-      <div className="p-6 overflow-auto" ref={containerRef}>
+    <div
+      className="slide-in overflow-y-auto"
+      style={{
+        width: "20vw",
+        padding: "12px 12px 0 12px",
+        backgroundColor: "white",
+        maxHeight: "100%",
+      }}
+    >
+      {selectedHighlight?.content?.text ? (
+        <>
+          <div className="text-black text-lg font-bold">Ask about...</div>
+          <Paragraph
+            ellipsis={{
+              rows: 3,
+              expandable: true,
+              collapsible: true,
+              expandText: "Show more",
+              collapseText: "Show less",
+            }}
+            style={{ width: "100%", paddingBottom: 8 }}
+          >
+            {`"${selectedHighlight?.content?.text}":`}
+          </Paragraph>
+        </>
+      ) : null}
+      <div ref={containerRef}>
         {messages.map(({ content, role, sources }, index) => (
           <ChatLine
             key={index}
@@ -122,13 +370,46 @@ export function Chat() {
         )}
       </div>
 
-      <InputMessage
+      {/* <InputMessage
         input={input}
         setInput={setInput}
         sendMessage={sendQuestion}
         placeholder={placeholder}
         isLoading={isLoading}
-      />
+      /> */}
+      {/* <div className="text-black">{selectedText}</div> */}
+      <div style={{ position: "sticky", bottom: 0, backgroundColor: "white" }}>
+        <TextArea
+          id="chat-box"
+          className="mt-2"
+          style={{ backgroundColor: "rgba(var(--semi-grey-0), 1)" }}
+          value={userQuestion}
+          rows={2}
+          onChange={setUserQuestion}
+          onEnterPress={(e) => {
+            sendQuestion(`${userQuestion}`);
+            setTimeout(() => {
+              setUserQuestion("");
+            }, 50);
+          }}
+        />
+        <div className="flex justify-end mt-2">
+          <Button
+            theme="solid"
+            type="primary"
+            onClick={() => {
+              sendQuestion(`${selectedText} ${userQuestion}`);
+              setTimeout(() => {
+                setUserQuestion("");
+              }, 50);
+            }}
+            disabled={isLoading || isAIBusy}
+            style={{ backgroundColor: "black", color: "white" }}
+          >
+            Send
+          </Button>
+        </div>
+      </div>
     </div>
   );
-}
+};

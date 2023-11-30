@@ -1,0 +1,37 @@
+.semi-collapse-header {
+    font-size: 12px;
+    margin: 0;
+    padding: 8px 4px;
+}
+
+.semi-input-textarea-wrapper-focus {
+    border-color: black;
+}
+
+.save-annotation:hover {
+    background-color: rgba(255, 226, 143, 1) !important;
+    transition: all 400ms;
+}
+
+.semi-typography-ellipsis-expand {
+    background-color: rgba(255, 226, 143, 1) !important;
+    color: black !important;
+}
+<<<<<<< HEAD
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0.2;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    }
+  
+.slide-in {
+animation: slideIn 250ms forwards;
+}
+=======
+>>>>>>> master

@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { callChain } from "@/lib/langchain";
 
 export async function POST(req: NextRequest) {
-  const { question, chatHistory } = await req.json();
+  const { question, phrase, chatHistory, translation, targetLang, indexKey } = await req.json();
+
+
+  if(!indexKey){
+    return NextResponse.json("Error: No index key in the request", {
+      status: 400,
+    });
+  }
 
   if (!question) {
     return NextResponse.json("Error: No question in the request", {
@@ -10,12 +17,19 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  let realPhrase=""
+  realPhrase= phrase||""
+
+  let realQuestion= "\""+realPhrase+"\""+question
   try {
     const transformStream = new TransformStream();
     const readableStream = callChain({
-      question,
+      question: realQuestion,
       chatHistory,
       transformStream,
+      translation: translation || question.includes("translate"),
+      targetLang: targetLang || "Chinese", 
+      indexKey:indexKey||"a",
     });
 
     return new Response(await readableStream);

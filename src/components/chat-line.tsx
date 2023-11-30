@@ -1,12 +1,5 @@
 import Balancer from "react-wrap-balancer";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, Collapse } from "@douyinfe/semi-ui";
 import { ChatGPTMessage } from "@/types";
 import {
   Accordion,
@@ -36,44 +29,54 @@ export function ChatLine({
   }
   const formattedMessage = convertNewLines(content);
 
-  return (
-    <div>
-      <Card className="mb-2">
-        <CardHeader>
-          <CardTitle
-            className={
-              role != "assistant"
-                ? "text-amber-500 dark:text-amber-200"
-                : "text-blue-500 dark:text-blue-200"
-            }
-          >
-            {role == "assistant" ? "AI" : "You"}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm">
-          <Balancer>{formattedMessage}</Balancer>
-        </CardContent>
-        <CardFooter>
-          <CardDescription className="w-full">
-            {sources ? (
-              <Accordion type="single" collapsible className="w-full">
-                {sources.map((source, index) => (
-                  <AccordionItem value={`source-${index}`} key={index}>
-                    <AccordionTrigger>{`Source ${index + 1}`}</AccordionTrigger>
-                    <AccordionContent>
-                      <ReactMarkdown linkTarget="_blank">
-                        {sanitizeAndFormatText(source)}
-                      </ReactMarkdown>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            ) : (
-              <></>
-            )}
-          </CardDescription>
-        </CardFooter>
+  if (role === "assistant") {
+    return (
+      <Card
+        style={{ width: "90%", marginTop: 8, borderBottomLeftRadius: 0 }}
+        bodyStyle={{ padding: "12px 16px", fontSize: 13 }}
+      >
+        <div className="font-bold">AI</div>
+        <div>{formattedMessage}</div>
+        {sources ? (
+          <Collapse accordion className="mt-1">
+            {sources?.slice(0, 3)?.map((source, index) => (
+              <Collapse.Panel
+                key={index}
+                header={`Source ${index + 1}`}
+                itemKey={`Source ${index + 1}`}
+                style={{ fontSize: 12 }}
+              >
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontFamily: "sans-serif",
+                    textAlign: "justify",
+                  }}
+                >
+                  {sanitizeAndFormatText(source.pageContent)}
+                </div>
+              </Collapse.Panel>
+            ))}
+          </Collapse>
+        ) : null}
       </Card>
-    </div>
-  );
+    );
+  } else {
+    return (
+      <Card
+        bordered={false}
+        style={{
+          marginLeft: "9%",
+          width: "90%",
+          marginTop: 8,
+          backgroundColor: "rgba(var(--semi-grey-1), 1)",
+          borderBottomRightRadius: 0,
+        }}
+        bodyStyle={{ padding: "12px 16px", fontSize: 13 }}
+      >
+        <div className="font-bold">You</div>
+        <div>{formattedMessage}</div>
+      </Card>
+    );
+  }
 }
