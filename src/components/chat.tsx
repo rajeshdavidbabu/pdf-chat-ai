@@ -102,7 +102,7 @@ export const Chat = () => {
 
   const updateMessages = (message: ChatGPTMessage) => {
     setMessages((previousMessages) => [...previousMessages, message]);
-    setTimeout(() => scrollToBottom(containerRef), 100);
+    setTimeout(() => scrollToBottom(containerRef), 50);
   };
 
   const updateChatHistory = (question: string, answer: string) => {
@@ -114,7 +114,7 @@ export const Chat = () => {
 
   const updateStreamingAIContent = (streamingAIContent: string) => {
     setStreamingAIContent(streamingAIContent);
-    setTimeout(() => scrollToBottom(containerRef), 100);
+    setTimeout(() => scrollToBottom(containerRef), 50);
   };
 
   useEffect(() => {
@@ -133,7 +133,8 @@ export const Chat = () => {
     if (showChat) {
       setTimeout(() => {
         (document.querySelector('#chat-box') as HTMLElement).focus();
-      }, 300);
+      }, 500);
+
     }
   }, [showChat]);
 
@@ -183,6 +184,7 @@ export const Chat = () => {
         },
         body: JSON.stringify({
           question,
+          phrase: selectedHighlight?.content.text,
           chatHistory,
           indexKey,
           ...(aiMode === "translate" && { language: "Chinese" }),
@@ -244,7 +246,7 @@ export const Chat = () => {
   }, [summary]);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && chatHistory.length) {
       setTimeout(() => {
         saveCurrChat();
       }, 500);
@@ -327,7 +329,7 @@ export const Chat = () => {
 
   return (
     <div
-      className="overflow-y-auto"
+      className="slide-in overflow-y-auto"
       style={{
         width: "20vw",
         padding: "12px 12px 0 12px",
@@ -346,7 +348,7 @@ export const Chat = () => {
               expandText: "Show more",
               collapseText: "Show less",
             }}
-            style={{ width: "100%" }}
+            style={{ width: "100%", paddingBottom: 8 }}
           >
             {`"${selectedHighlight?.content?.text}":`}
           </Paragraph>
@@ -385,7 +387,7 @@ export const Chat = () => {
           rows={2}
           onChange={setUserQuestion}
           onEnterPress={(e) => {
-            sendQuestion(`${selectedText} ${userQuestion}`);
+            sendQuestion(`${userQuestion}`);
             setTimeout(() => {
               setUserQuestion("");
             }, 50);

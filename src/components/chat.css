@@ -17,3 +17,21 @@
     background-color: rgba(255, 226, 143, 1) !important;
     color: black !important;
 }
+<<<<<<< HEAD
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0.2;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    }
+  
+.slide-in {
+animation: slideIn 250ms forwards;
+}
+=======
+>>>>>>> master
