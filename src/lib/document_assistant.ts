@@ -28,7 +28,7 @@ export class DocumentAssistantManager {
       return
     }
     try {
-      const pineconeClient = await initPineconeClient(key);
+      const pineconeClient = await getPineconeClient();
       if (pineconeClient===null){
           return
       }
