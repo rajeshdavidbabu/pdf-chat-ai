@@ -61,6 +61,9 @@ class PdfDisplayer extends Component<{
   setHighlights: React.Dispatch<React.SetStateAction<IHighlight[]>>,
   setSelectedHighlight: React.Dispatch<React.SetStateAction<IHighlight | undefined>>,
   addHighlight?: ((highlight: NewHighlight) => void) | undefined,
+  setSummary?: React.Dispatch<React.SetStateAction<string>>;
+  isAIBusy: boolean,
+  setIsAIBusy?: React.Dispatch<React.SetStateAction<boolean>>;
 }, State> {
   state = {
     url: initialUrl,
@@ -81,13 +84,36 @@ class PdfDisplayer extends Component<{
     formData.append('file', file);
     formData.append('key', key);
     try {
+      this.props.setIsAIBusy?.(true);
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
-      console.log("resp", response);
+      const reader = response?.body?.getReader();
+      let streamingSummary = "";
+      let tokensEnded = false;
+      while (true) {
+        const { done, value } = (await reader?.read()) || {};
+        if (done) {
+          break;
+        }
+        const text = new TextDecoder().decode(value);
+        if (text.includes("tokens-ended") && !tokensEnded) {
+          tokensEnded = true;
+          let texts = text.split("tokens-ended");
+          if (texts.length > 1) {
+            streamingSummary = streamingSummary + texts[0];
+          }
+        } else {
+          streamingSummary = streamingSummary + text;
+        }
+      }
+      console.log("streaming summary", streamingSummary);
+      this.props.setSummary?.(streamingSummary);
     } catch (err) {
       console.log(err);
+    } finally {
+      this.props.setIsAIBusy?.(false);
     }
   };
 
@@ -138,7 +164,7 @@ class PdfDisplayer extends Component<{
 
   render() {
     const { url } = this.state;
-    const { highlights, setHighlights, setSelectedHighlight } = this.props;
+    const { highlights, setHighlights, setSelectedHighlight, setSummary } = this.props;
 
     return (
       <div className="App" style={{ display: "flex", height: "100%" }}>

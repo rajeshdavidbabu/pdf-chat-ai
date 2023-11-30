@@ -28,6 +28,8 @@ export type PdfContextProps = {
   >;
   summary: string;
   setSummary?: React.Dispatch<React.SetStateAction<string>>;
+  isAIBusy: boolean,
+  setIsAIBusy?: React.Dispatch<React.SetStateAction<boolean>>;
   storage: FileStorage[];
 };
 
@@ -49,6 +51,8 @@ export const PdfContext = createContext<PdfContextProps>({
   setSelectedHighlight: undefined,
   summary: "",
   setSummary: undefined,
+  isAIBusy: false,
+  setIsAIBusy: undefined,
   storage: [],
 });
 
@@ -65,6 +69,7 @@ export default function Home() {
   const titleRef = useRef(null);
   const isHovering = useHover(titleRef);
   const [selectedHighlight, setSelectedHighlight] = useState<IHighlight>();
+  const [isAIBusy, setIsAIBusy] = useState<boolean>(false);
   const [storage, setStorage] = useState<FileStorage[]>([]);
 
   useEffect(() => {
@@ -134,6 +139,8 @@ export default function Home() {
             setSelectedHighlight,
             summary,
             setSummary,
+            isAIBusy,
+            setIsAIBusy,
             storage,
           }}
         >
@@ -142,6 +149,9 @@ export default function Home() {
             setHighlights={setHighlights}
             setSelectedHighlight={setSelectedHighlight}
             addHighlight={addHighlight}
+            setSummary={setSummary}
+            isAIBusy={isAIBusy}
+            setIsAIBusy={setIsAIBusy}
           />
           {showChat ? <Chat /> : null}
         </PdfContext.Provider>
