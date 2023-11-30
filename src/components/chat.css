@@ -17,6 +17,7 @@
     background-color: rgba(255, 226, 143, 1) !important;
     color: black !important;
 }
+<<<<<<< HEAD
 
 @keyframes slideIn {
     from {
@@ -32,3 +33,5 @@
 .slide-in {
 animation: slideIn 250ms forwards;
 }
+=======
+>>>>>>> master

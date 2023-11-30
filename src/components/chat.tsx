@@ -134,6 +134,7 @@ export const Chat = () => {
       setTimeout(() => {
         (document.querySelector('#chat-box') as HTMLElement).focus();
       }, 500);
+
     }
   }, [showChat]);
 
@@ -247,7 +248,6 @@ export const Chat = () => {
   useEffect(() => {
     if (!isLoading && chatHistory.length) {
       setTimeout(() => {
-        console.log(11111);
         saveCurrChat();
       }, 500);
     }
