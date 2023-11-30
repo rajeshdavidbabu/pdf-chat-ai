@@ -38,7 +38,7 @@ export function ChatLine({
 
   return (
     <div>
-      <Card className="mb-2">
+      <Card className="mb-2 bg-white">
         <CardHeader>
           <CardTitle
             className={

@@ -126,7 +126,7 @@ export class DocumentAssistantAgent {
     return this.chatHistory
   }
 
-  async askQuestion(question: string) {
+  async askQuestion(question: string,translation:boolean , targetLang:string) {
     let newQuestion :[string,string] = ["Question:", question];
     let manager=this.manager
     let pinecone= manager?.pineconeClientInstance
@@ -143,6 +143,8 @@ export class DocumentAssistantAgent {
       transformStream,
       pineconeClient: pinecone,
       indexName:key,
+      translation,
+      targetLang
     });
 
     let resp =await new Response(await readableStream);

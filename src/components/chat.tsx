@@ -1,13 +1,15 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { InputMessage } from "./input-message";
 import { scrollToBottom, initialMessage } from "@/lib/utils";
 import { ChatLine } from "./chat-line";
 import { ChatGPTMessage, DocumentInfo } from "@/types";
 import { Document } from "langchain/document";
+import { PdfContext } from "@/app/page";
+import { Button, Input } from "@douyinfe/semi-ui";
 
-export function Chat() {
+export const Chat = () => {
   const endpoint = "/api/chat";
   const [input, setInput] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -15,6 +17,9 @@ export function Chat() {
   const [chatHistory, setChatHistory] = useState<[string, string][]>([]);
   const [streamingAIContent, setStreamingAIContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const { selectedText } = useContext(PdfContext);
+  const [userQuestion, setUserQuestion] = useState("");
+  console.log("selectedText: ", selectedText);
 
   const updateMessages = (message: ChatGPTMessage) => {
     setMessages((previousMessages) => [...previousMessages, message]);
@@ -41,7 +46,7 @@ export function Chat() {
     const sourceContents: DocumentInfo[] = JSON.parse(sourceDocuments);
     let sources: DocumentInfo[] = [];
 
-    sourceContents.forEach(element => {
+    sourceContents.forEach((element) => {
       sources.push(element);
     });
     // Add the streamed message as the AI response
@@ -83,18 +88,18 @@ export function Chat() {
         if (done) {
           break;
         }
-        
+
         const text = new TextDecoder().decode(value);
         if (text.includes("tokens-ended") && !tokensEnded) {
           tokensEnded = true;
 
           let texts = text.split("tokens-ended");
           if (texts.length > 1) {
-            streamingAIContent = streamingAIContent + texts[1];
+            streamingAIContent = streamingAIContent + texts[0];
             updateStreamingAIContent(streamingAIContent);
           }
           if (texts.length > 2) {
-            sourceDocuments += texts[2];
+            sourceDocuments += texts[1];
           }
         } else if (tokensEnded) {
           sourceDocuments += text;
@@ -103,7 +108,7 @@ export function Chat() {
           updateStreamingAIContent(streamingAIContent);
         }
       }
-      
+
       handleStreamEnd(question, streamingAIContent, sourceDocuments);
     } catch (error) {
       console.log("Error occured ", error);
@@ -119,8 +124,16 @@ export function Chat() {
   }
 
   return (
-    <div className="rounded-2xl border h-[75vh] flex flex-col justify-between">
-      <div className="p-6 overflow-auto" ref={containerRef}>
+    <div
+      className="fixed right-3 top-2 p-3 overflow-y-auto"
+      style={{
+        borderRadius: 18,
+        width: "20vw",
+        backgroundColor: "white",
+        maxHeight: "90vh",
+      }}
+    >
+      <div ref={containerRef}>
         {messages.map(({ content, role, sources }, index) => (
           <ChatLine
             key={index}
@@ -136,13 +149,24 @@ export function Chat() {
         )}
       </div>
 
-      <InputMessage
+      {/* <InputMessage
         input={input}
         setInput={setInput}
         sendMessage={sendQuestion}
         placeholder={placeholder}
         isLoading={isLoading}
-      />
+      /> */}
+      <div className="text-black">{selectedText}</div>
+      <Input value={userQuestion} onChange={setUserQuestion} />
+      <div className="flex justify-end mt-1">
+        <Button
+          theme="solid"
+          type="primary"
+          onClick={() => sendQuestion(`${selectedText} ${userQuestion}`)}
+        >
+          Send
+        </Button>
+      </div>
     </div>
   );
-}
+};

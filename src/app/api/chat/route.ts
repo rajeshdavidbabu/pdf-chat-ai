@@ -7,9 +7,7 @@ import { error } from "console";
 
 
 export async function POST(req: NextRequest) {
-  
-  const { question, chatHistory } = await req.json();
-
+  const { question, chatHistory, translation, targetLang } = await req.json();
   if (!question) {
     return NextResponse.json("Error: No question in the request", {
       status: 400,
@@ -22,13 +20,17 @@ export async function POST(req: NextRequest) {
       await initDocumentAssistantManager("docs/great-gatsby.pdf", "deep-learning-bishop-pdf")
       await initDocumentAssistantAgent("ANNOTATION_TEST")
     }
+    const transformStream = new TransformStream();
 
 
     let agent=getDocumentAssistantAgent()
     if (agent===null){
       throw new Error("agent not inited")
     }
-    return agent.askQuestion(question);
+    return agent.askQuestion(question,
+       translation || question.includes("translate"),
+      targetLang || "Chinese",
+       );
   } catch (error) {
     console.error("Internal server error ", error);
     return NextResponse.json("Error: Something went wrong. Try again!", {
