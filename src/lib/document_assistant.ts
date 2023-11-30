@@ -6,12 +6,13 @@ import { PineconeClient } from "@pinecone-database/pinecone";
 
 import { getChunkedDocsFromPDF } from "@/lib/pdf-loader";
 import { pineconeEmbedAndStore } from "@/lib/vector-store";
-import { getPineconeClient } from "@/lib/pinecone-client";
+import { getPineconeClient,createdIndex } from "@/lib/pinecone-client";
 
 import { callChain } from "@/lib/langchain";
 
 import { env } from "./config";
 let documentAssistantManagerInstance: DocumentAssistantManager | null = null;
+let documentAssistantAgentInstance:DocumentAssistantAgent | null = null;
 
 export class DocumentAssistantManager {
   public pineconeClientInstance: PineconeClient | null = null;
@@ -22,7 +23,10 @@ export class DocumentAssistantManager {
     this.pineconeClientInstance = await initPineconeClient(key);
     this.key=key
 
-
+    if (!createdIndex){
+      console.log("no need to embed and store, already existing index")
+      return
+    }
     try {
       const pineconeClient = await getPineconeClient();
       if (pineconeClient===null){
@@ -61,7 +65,11 @@ export function isManagerInited(){
 
 
 export  function getDocumentAssistantManager() {
-  return documentAssistantManagerInstance
+  if (isManagerInited()){
+    return documentAssistantManagerInstance
+  }else{
+    throw new Error("document assistant manager not inited"); 
+  }
 }
 
 async function streamToString(stream: any) {
@@ -103,12 +111,12 @@ async function toJSON(body :any) {
 }
 
 export class DocumentAssistantAgent {
-  phrase:string;
+  phrase:any;
   public manager:DocumentAssistantManager|null;
   chatHistory:[string, string][] 
 
   //manager: DocumentAssistantManager
-  constructor(phrase: string) {
+  constructor(phrase: any) {
   this.phrase=phrase
   this.manager= getDocumentAssistantManager()
   this.chatHistory=[]
@@ -156,3 +164,16 @@ export class DocumentAssistantAgent {
 
 
 
+export  function initDocumentAssistantAgent(phrase: string ) {
+  try {
+    const documentAssistant = new DocumentAssistantAgent(phrase);
+    documentAssistantAgentInstance = documentAssistant
+  } catch (error) {
+    console.error("error", error);
+    throw new Error("Failed to initialize Pinecone Client");
+  }
+}
+
+export function getDocumentAssistantAgent( ) {
+  return documentAssistantAgentInstance
+}

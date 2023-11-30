@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callChain } from "@/lib/langchain";
-import { DocumentAssistantManager, getDocumentAssistantManager,initDocumentAssistantManager ,DocumentAssistantAgent,isManagerInited} from "@/lib/document_assistant";
+import { DocumentAssistantManager, getDocumentAssistantManager,initDocumentAssistantManager ,DocumentAssistantAgent,isManagerInited, initDocumentAssistantAgent, getDocumentAssistantAgent} from "@/lib/document_assistant";
+import { error } from "console";
  
 
 
@@ -17,11 +18,14 @@ export async function POST(req: NextRequest) {
 
   try {
     if (!isManagerInited()){
-      console.log("initing docs")
+      console.error("manager not inited, initing with great gatsby docs")
       await initDocumentAssistantManager("docs/great-gatsby.pdf", "deep-learning-bishop-pdf")
+      await initDocumentAssistantAgent("ANNOTATION_TEST")
     }
-    let docassist=await getDocumentAssistantManager()
-    let agent=new DocumentAssistantAgent("ANNOTATION_TEST");
+    let agent=getDocumentAssistantAgent()
+    if (agent===null){
+      throw new Error("agent not inited")
+    }
     return agent.askQuestion(question);
   } catch (error) {
     console.error("Internal server error ", error);
