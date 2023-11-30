@@ -42,10 +42,10 @@ const Tip = ({ onConfirm, onOpen, onUpdate }: TipProps) => {
 
   const { compact, text, emoji } = state;
 
-  const onClickAction = () => {
-    setShowChat && setShowChat(true);
-    setSelectedText &&
-      setSelectedText(window.getSelection()?.toString() || "");
+  const onClickAction = (aiMode: 'chat' | 'translate') => {
+    setAiMode?.(aiMode);
+    setShowChat?.(true);
+    setSelectedText?.(window.getSelection()?.toString() || "");
     onOpen();
     setState((prevState) => ({ ...prevState, compact: false }));
   };
@@ -61,20 +61,14 @@ const Tip = ({ onConfirm, onOpen, onUpdate }: TipProps) => {
           size="small"
           icon={<IconLanguage />}
           className="mr-1"
-          onClick={() => {
-            onClickAction();
-            setAiMode && setAiMode('translation');
-          }}
+          onClick={() => onClickAction('translate')}
         />
         <Button
           theme="borderless"
           type="tertiary"
           size="small"
           icon={<IconCustomerSupport />}
-          onClick={() => {
-            onClickAction();
-            setAiMode && setAiMode('chat');
-          }}
+          onClick={() => onClickAction('chat')}
         />
       </div>
     </div>

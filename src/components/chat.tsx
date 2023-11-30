@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { InputMessage } from "./input-message";
 import { scrollToBottom, initialMessage } from "@/lib/utils";
 import { ChatLine } from "./chat-line";
@@ -10,9 +10,13 @@ import { PdfContext } from "@/app/page";
 import { Button, Input, TextArea } from "@douyinfe/semi-ui";
 import "./chat.css";
 
+const aiModeToEndpoint = {
+  'translate': "/api/translate",
+  'chat': "/api/chat"
+}
+
 export const Chat = () => {
-  const { indexKey, selectedText } = useContext(PdfContext);
-  const endpoint = "/api/chat";
+  const { indexKey, selectedText, aiMode } = useContext(PdfContext);
   const [input, setInput] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [messages, setMessages] = useState<ChatGPTMessage[]>(initialMessage);
@@ -20,7 +24,6 @@ export const Chat = () => {
   const [streamingAIContent, setStreamingAIContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [userQuestion, setUserQuestion] = useState("");
-  console.log("selectedText: ", selectedText);
 
   const updateMessages = (message: ChatGPTMessage) => {
     setMessages((previousMessages) => [...previousMessages, message]);
@@ -62,9 +65,11 @@ export const Chat = () => {
   };
 
   // send message to API /api/chat endpoint
-  const sendQuestion = async (question: string) => {
+  const sendQuestion = async (question: string, aiMode: 'translate' | 'chat' = "chat") => {
+    const endpoint = aiModeToEndpoint[aiMode];
+
     setIsLoading(true);
-    updateMessages({ role: "user", content: question });
+    updateMessages({ role: "user", content:  aiMode === "translate" ? `Translate ${question}` : question });
 
     try {
       const response = await fetch(endpoint, {
@@ -75,7 +80,8 @@ export const Chat = () => {
         body: JSON.stringify({
           question,
           chatHistory,
-          indexKey
+          indexKey,
+          ...(aiMode === "translate" && { language: "Chinese" })
         }),
       });
 
@@ -118,6 +124,13 @@ export const Chat = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    console.log("ai mode or selected text changed", aiMode, selectedText)
+    if (aiMode === 'translate' && selectedText !== "") {
+      sendQuestion(selectedText, 'translate');
+    }
+  }, [aiMode, selectedText])
 
   let placeholder = "Type a message to start ...";
 

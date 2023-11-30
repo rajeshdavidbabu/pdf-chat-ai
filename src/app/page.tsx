@@ -12,8 +12,8 @@ export const PdfContext = createContext<{
   setShowChat?: React.Dispatch<React.SetStateAction<boolean>>;
   selectedText: string;
   setSelectedText?: React.Dispatch<React.SetStateAction<string>>;
-  aiMode: string;
-  setAiMode?: React.Dispatch<React.SetStateAction<string>>;
+  aiMode: 'chat' | 'translate';
+  setAiMode?: React.Dispatch<React.SetStateAction<'chat' | 'translate'>>;
   fileName: string;
   setFileName?: React.Dispatch<React.SetStateAction<string>>;
   indexKey: string;
@@ -23,7 +23,7 @@ export const PdfContext = createContext<{
   setShowChat: undefined,
   selectedText: "",
   setSelectedText: undefined,
-  aiMode: "",
+  aiMode: "chat",
   setAiMode: undefined,
   fileName: "",
   setFileName: undefined,
@@ -34,7 +34,7 @@ export const PdfContext = createContext<{
 export default function Home() {
   const [showChat, setShowChat] = useState(true);
   const [selectedText, setSelectedText] = useState("");
-  const [aiMode, setAiMode] = useState("translation");
+  const [aiMode, setAiMode] = useState<'chat' | 'translate'>("chat");
   const [fileName, setFileName] = useState<string>("");
   const [indexKey, setIndexKey] = useState<string>("");
   const titleRef = useRef(null);
