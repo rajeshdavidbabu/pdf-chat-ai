@@ -19,6 +19,8 @@ import { testHighlights as _testHighlights } from "./test-highlights";
 import "./style/App.css";
 import { PdfHighlighter } from "./components/PdfHighlighter";
 
+import { PdfContext } from "./page";
+
 const testHighlights: Record<string, Array<IHighlight>> = _testHighlights;
 
 interface State {
@@ -55,7 +57,7 @@ const searchParams = new URLSearchParams(document.location.search);
 
 const initialUrl = searchParams.get("url") || PRIMARY_PDF_URL;
 
-class App extends Component<{}, State> {
+class PdfDisplayer extends Component<{}, State> {
   state = {
     url: initialUrl,
     highlights: testHighlights[initialUrl]
@@ -76,11 +78,25 @@ class App extends Component<{}, State> {
     })
   }
 
-  openDocument = (url: string) => {
+  handleOpenFile = async (file: File) => {
+    const url = URL.createObjectURL(file);
     this.setState({
       url: url,
       highlights: testHighlights[url] ? [...testHighlights[url]] : [],
     });
+    const key = file.name.replace(/[^a-zA-Z0-9]/g, '');
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('key', key);
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      console.log("resp", response);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   scrollViewerTo = (highlight: any) => {};
@@ -148,7 +164,7 @@ class App extends Component<{}, State> {
         <Sidebar
           highlights={highlights}
           deleteHighlight={this.deleteHighlight}
-          onDocumentOpened={this.openDocument}
+          onFileOpen={this.handleOpenFile}
         />
         <div
           style={{
@@ -241,4 +257,4 @@ class App extends Component<{}, State> {
   }
 }
 
-export default App;
+export default PdfDisplayer;

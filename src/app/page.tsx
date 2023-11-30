@@ -16,6 +16,8 @@ export const PdfContext = createContext<{
   setAiMode?: React.Dispatch<React.SetStateAction<string>>;
   fileName: string;
   setFileName?: React.Dispatch<React.SetStateAction<string>>;
+  indexKey: string;
+  setIndexKey?: React.Dispatch<React.SetStateAction<string>>;
 }>({
   showChat: false,
   setShowChat: undefined,
@@ -25,6 +27,8 @@ export const PdfContext = createContext<{
   setAiMode: undefined,
   fileName: "",
   setFileName: undefined,
+  indexKey: "",
+  setIndexKey: undefined,
 });
 
 export default function Home() {
@@ -32,6 +36,7 @@ export default function Home() {
   const [selectedText, setSelectedText] = useState("");
   const [aiMode, setAiMode] = useState("translation");
   const [fileName, setFileName] = useState<string>("");
+  const [indexKey, setIndexKey] = useState<string>("");
   const titleRef = useRef(null);
   const isHovering = useHover(titleRef);
   return (
@@ -77,6 +82,8 @@ export default function Home() {
             setAiMode,
             fileName,
             setFileName,
+            indexKey,
+            setIndexKey
           }}
         >
           <PdfDisplayer />
