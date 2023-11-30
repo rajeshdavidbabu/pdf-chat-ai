@@ -22,6 +22,8 @@ export async function POST(req: NextRequest) {
       await initDocumentAssistantManager("docs/great-gatsby.pdf", "deep-learning-bishop-pdf")
       await initDocumentAssistantAgent("ANNOTATION_TEST")
     }
+
+
     let agent=getDocumentAssistantAgent()
     if (agent===null){
       throw new Error("agent not inited")
