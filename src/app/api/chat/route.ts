@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { callChain } from "@/lib/langchain";
 
 export async function POST(req: NextRequest) {
-  const { question, chatHistory, translation, targetLang, indexKey } = await req.json();
+  const { question, phrase, chatHistory, translation, targetLang, indexKey } = await req.json();
 
 
   if(!indexKey){
@@ -17,10 +17,14 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  let realPhrase=""
+  realPhrase= phrase||""
+
+  let realQuestion= "\""+realPhrase+"\""+question
   try {
     const transformStream = new TransformStream();
     const readableStream = callChain({
-      question,
+      question: realQuestion,
       chatHistory,
       transformStream,
       translation: translation || question.includes("translate"),
