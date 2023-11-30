@@ -7,14 +7,15 @@ import { createContext, useEffect, useRef, useState } from "react";
 import { Button, Layout } from "@douyinfe/semi-ui";
 import { useHover } from "ahooks";
 import { IHighlight, NewHighlight } from "./types/types";
+import { updateHash } from "./Sidebar";
 
 export type PdfContextProps = {
   showChat: boolean;
   setShowChat?: React.Dispatch<React.SetStateAction<boolean>>;
   selectedText: string;
   setSelectedText?: React.Dispatch<React.SetStateAction<string>>;
-  aiMode: 'chat' | 'translate';
-  setAiMode?: React.Dispatch<React.SetStateAction<'chat' | 'translate'>>;
+  aiMode: "chat" | "translate";
+  setAiMode?: React.Dispatch<React.SetStateAction<"chat" | "translate">>;
   fileName: string;
   setFileName?: React.Dispatch<React.SetStateAction<string>>;
   indexKey: string;
@@ -59,9 +60,9 @@ export const PdfContext = createContext<PdfContextProps>({
 const getNextId = () => String(Math.random()).slice(2);
 
 export default function Home() {
-  const [showChat, setShowChat] = useState(true);
+  const [showChat, setShowChat] = useState(false);
   const [selectedText, setSelectedText] = useState("");
-  const [aiMode, setAiMode] = useState<'chat' | 'translate'>("chat");
+  const [aiMode, setAiMode] = useState<"chat" | "translate">("chat");
   const [fileName, setFileName] = useState<string>("");
   const [indexKey, setIndexKey] = useState<string>("");
   const [highlights, setHighlights] = useState<IHighlight[]>([]);
@@ -73,16 +74,32 @@ export default function Home() {
   const [storage, setStorage] = useState<FileStorage[]>([]);
 
   useEffect(() => {
-    const storage = JSON.parse(localStorage.getItem('chatStorage') || '[]') as FileStorage[];
+    const storage = JSON.parse(
+      localStorage.getItem("chatStorage") || "[]"
+    ) as FileStorage[];
     setStorage(storage);
-    const highlights = storage.find(i => i.fileName === fileName)?.histories.map(h => h.highlight) || [];
+    const highlights =
+      storage
+        .find((i) => i.fileName === fileName)
+        ?.histories.map((h) => h.highlight) || [];
     setHighlights(highlights);
-  }, [fileName])
+  }, [fileName]);
+
+  useEffect(() => {
+    const allHighlightIds = highlights.map((h) => h.id);
+    const storageIndex = storage.findIndex((s) => s.fileName === fileName);
+    if (storageIndex >= 0) {
+      storage[storageIndex].histories = storage[storageIndex].histories.filter(
+        (h) => allHighlightIds.includes(h.highlightId)
+      );
+      localStorage.setItem("chatStorage", JSON.stringify(storage));
+    }
+  }, [highlights]);
 
   const addHighlight = (highlight: NewHighlight) => {
     console.log("Saving highlight", highlight);
     const newHighlight = { ...highlight, id: getNextId(), isSaved: false };
-    console.log("newHighlight: ", newHighlight);
+    updateHash(newHighlight);
     setSelectedHighlight({ ...newHighlight });
     setHighlights([newHighlight, ...highlights]);
   };

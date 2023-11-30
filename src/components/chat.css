@@ -12,3 +12,8 @@
     background-color: rgba(255, 226, 143, 1) !important;
     transition: all 400ms;
 }
+
+.semi-typography-ellipsis-expand {
+    background-color: rgba(255, 226, 143, 1) !important;
+    color: black !important;
+}
