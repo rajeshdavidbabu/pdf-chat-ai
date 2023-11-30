@@ -46,6 +46,9 @@ export const Chat = () => {
     indexKey,
     selectedText,
     aiMode,
+    summary,
+    isAIBusy,
+    setIsAIBusy,
   } = useContext(PdfContext);
   const endpoint = "/api/chat";
   const [input, setInput] = useState("");
@@ -224,6 +227,15 @@ export const Chat = () => {
     }
   }, [aiMode, selectedText]);
 
+  useEffect(() => {
+    if (summary !== "") {
+      updateMessages({
+        role: "assistant",
+        content: "Summary:\n" + summary,
+      });
+    }
+  }, [summary]);
+
   const saveCurrChat = () => {
     const highlightsCopy = [...highlights];
     const index = highlightsCopy.findIndex(
@@ -367,7 +379,7 @@ export const Chat = () => {
                 setUserQuestion("");
               }, 50);
             }}
-            disabled={isLoading}
+            disabled={isLoading || isAIBusy}
             style={{ backgroundColor: "black", color: "white" }}
           >
             Send
