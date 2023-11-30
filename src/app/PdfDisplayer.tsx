@@ -5,7 +5,7 @@ import React, { Component } from "react";
 import {
   PdfLoader,
   AreaHighlight,
-  Popup
+  Popup,
 } from "react-pdf-highlighter";
 import { Highlight } from "./components/Highlight";
 import Tip from "./components/Tip";
@@ -55,7 +55,7 @@ const searchParams = new URLSearchParams(document.location.search);
 
 const initialUrl = searchParams.get("url") || PRIMARY_PDF_URL;
 
-class App extends Component<{}, State> {
+class PdfDisplayer extends Component<{}, State> {
   state = {
     url: initialUrl,
     highlights: testHighlights[initialUrl]
@@ -68,7 +68,7 @@ class App extends Component<{}, State> {
       highlights: [],
     });
   };
-
+    
   deleteHighlight = (id: string) => {
     const highlightsCopy = [...this.state.highlights];
     this.setState({
@@ -76,11 +76,26 @@ class App extends Component<{}, State> {
     })
   }
 
-  openDocument = (url: string) => {
+  handleOpenFile = async (file: File) => {
+    const url = URL.createObjectURL(file);
     this.setState({
       url: url,
       highlights: testHighlights[url] ? [...testHighlights[url]] : [],
     });
+    const fileName = url.split("/").pop() as string;
+    const key = fileName.slice(fileName.length > 40 ? fileName.length - 40 : 0);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('key', key);
+    try {
+      const response = await fetch("/api/doc", {
+        method: "POST",
+        body: formData,
+      });
+      console.log("resp", response);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   scrollViewerTo = (highlight: any) => {};
@@ -147,8 +162,9 @@ class App extends Component<{}, State> {
       <div className="App" style={{ display: "flex", height: "100%" }}>
         <Sidebar
           highlights={highlights}
+          resetHighlights={this.resetHighlights}
+          onFileOpen={this.handleOpenFile}
           deleteHighlight={this.deleteHighlight}
-          onDocumentOpened={this.openDocument}
         />
         <div
           style={{
@@ -240,4 +256,4 @@ class App extends Component<{}, State> {
   }
 }
 
-export default App;
+export default PdfDisplayer;
