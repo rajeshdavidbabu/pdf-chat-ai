@@ -3,7 +3,7 @@
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { Chat, FileStorage } from "@/components/chat";
 import PdfDisplayer from "./PdfDisplayer";
-import { createContext, useRef, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import { Button, Layout } from "@douyinfe/semi-ui";
 import { useHover } from "ahooks";
 import { IHighlight, NewHighlight } from "./types/types";
