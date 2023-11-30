@@ -57,5 +57,5 @@ All commands are run from the root of the project, from a terminal:
 
 ## 👏🏽 Contributing
 
-Pull requests are welcome. For major changes, please open an issue first
+Pull requests are welcome, before creating a PR talk to me on [discord](https://discord.com/channels/1121796870231040020/1156553471881908275). For major changes, please open an issue first
 to discuss what you would like to change.
