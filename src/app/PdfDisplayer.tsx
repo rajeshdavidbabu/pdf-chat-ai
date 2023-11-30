@@ -215,6 +215,7 @@ class PdfDisplayer extends Component<{}, State> {
 
                   const component = isTextHighlight ? (
                     <Highlight
+                      highlight={highlight}
                       isScrolledTo={isScrolledTo}
                       position={highlight.position}
                       comment={highlight.comment}

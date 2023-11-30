@@ -130,7 +130,7 @@ export const Chat = () => {
       className="overflow-y-auto"
       style={{
         width: "20vw",
-        padding: '12px 12px 0 12px',
+        padding: "12px 12px 0 12px",
         backgroundColor: "white",
         maxHeight: "100%",
       }}
@@ -159,31 +159,34 @@ export const Chat = () => {
         isLoading={isLoading}
       /> */}
       {/* <div className="text-black">{selectedText}</div> */}
-      <div style={{ position: 'sticky', bottom: 0, backgroundColor: 'white' }}>
+      <div style={{ position: "sticky", bottom: 0, backgroundColor: "white" }}>
         <TextArea
           className="mt-2"
-          style={{ backgroundColor: 'rgba(var(--semi-grey-0), 1)' }}
+          style={{ backgroundColor: "rgba(var(--semi-grey-0), 1)" }}
           value={userQuestion}
           rows={2}
           onChange={setUserQuestion}
           onEnterPress={(e) => {
             sendQuestion(`${selectedText} ${userQuestion}`);
             setTimeout(() => {
-              setUserQuestion('');
+              setUserQuestion("");
             }, 50);
           }}
         />
-        <div className="flex justify-end mt-1">
+        <div className="flex justify-end mt-2">
+          <Button className="save-annotation" theme="borderless" type="primary" style={{ marginRight: 8, color: 'black' }}>
+            Save as annotation
+          </Button>
           <Button
             theme="solid"
             type="primary"
             onClick={() => {
               sendQuestion(`${selectedText} ${userQuestion}`);
               setTimeout(() => {
-                setUserQuestion('');
+                setUserQuestion("");
               }, 50);
             }}
-            style={{ backgroundColor: 'black', color: 'white' }}
+            style={{ backgroundColor: "black", color: "white" }}
           >
             Send
           </Button>

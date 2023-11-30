@@ -9,7 +9,7 @@ interface Props {
   deleteHighlight: (id: string) => void;
 }
 
-const updateHash = (highlight: IHighlight) => {
+export const updateHash = (highlight: IHighlight) => {
   document.location.hash = `highlight-${highlight.id}`;
 };
 

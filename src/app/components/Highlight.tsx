@@ -2,7 +2,8 @@ import React, { Component } from "react";
 
 import "../style/Highlight.css";
 
-import type { LTWHP } from "../types/types";
+import type { IHighlight, LTWHP } from "../types/types";
+import { updateHash } from "../Sidebar";
 
 interface Props {
   position: {
@@ -16,6 +17,7 @@ interface Props {
     emoji: string;
     text: string;
   };
+  highlight: IHighlight;
   isScrolledTo: boolean;
 }
 
@@ -27,6 +29,7 @@ export class Highlight extends Component<Props> {
       onMouseOver,
       onMouseOut,
       comment,
+      highlight,
       isScrolledTo,
     } = this.props;
 
@@ -36,6 +39,7 @@ export class Highlight extends Component<Props> {
       <div
         className={`Highlight ${isScrolledTo ? "Highlight--scrolledTo" : ""}`}
         style={{ backgroundColor: 'red' }}
+        onClick={() => updateHash(highlight)}
       >
         {comment ? (
           <div
