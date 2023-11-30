@@ -25,7 +25,6 @@ const testHighlights: Record<string, Array<IHighlight>> = _testHighlights;
 
 interface State {
   url: string;
-  highlights: Array<IHighlight>;
 }
 
 const getNextId = () => String(Math.random()).slice(2);
@@ -65,29 +64,17 @@ class PdfDisplayer extends Component<{
 }, State> {
   state = {
     url: initialUrl,
-    highlights: testHighlights[initialUrl]
-      ? [...testHighlights[initialUrl]]
-      : [],
-  };
-
-  resetHighlights = () => {
-    this.setState({
-      highlights: [],
-    });
   };
 
   deleteHighlight = (id: string) => {
-    const highlightsCopy = [...this.state.highlights];
-    this.setState({
-      highlights: highlightsCopy.filter(i => i.id !== id),
-    })
+    const highlightsCopy = [...this.props.highlights];
+    this.props.setHighlights(highlightsCopy.filter(i => i.id !== id));
   }
 
   handleOpenFile = async (file: File) => {
     const url = URL.createObjectURL(file);
     this.setState({
       url: url,
-      highlights: testHighlights[url] ? [...testHighlights[url]] : [],
     });
     const key = file.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
     const formData = new FormData();
@@ -123,7 +110,7 @@ class PdfDisplayer extends Component<{
   }
 
   getHighlightById(id: string) {
-    const { highlights } = this.state;
+    const { highlights } = this.props;
 
     return highlights.find((highlight) => highlight.id === id);
   }
@@ -131,24 +118,22 @@ class PdfDisplayer extends Component<{
   updateHighlight(highlightId: string, position: Object, content: Object) {
     console.log("Updating highlight", highlightId, position, content);
 
-    this.setState({
-      highlights: this.state.highlights.map((h) => {
-        const {
-          id,
-          position: originalPosition,
-          content: originalContent,
-          ...rest
-        } = h;
-        return id === highlightId
-          ? {
-              id,
-              position: { ...originalPosition, ...position },
-              content: { ...originalContent, ...content },
-              ...rest,
-            }
-          : h;
-      }),
-    });
+    this.props.setHighlights(this.props.highlights.map((h) => {
+      const {
+        id,
+        position: originalPosition,
+        content: originalContent,
+        ...rest
+      } = h;
+      return id === highlightId
+        ? {
+            id,
+            position: { ...originalPosition, ...position },
+            content: { ...originalContent, ...content },
+            ...rest,
+          }
+        : h;
+    }));
   }
 
   render() {

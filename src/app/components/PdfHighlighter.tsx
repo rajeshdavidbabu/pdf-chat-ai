@@ -451,14 +451,14 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
   onScroll = () => {
     const { onScrollChange } = this.props;
 
-    onScrollChange();
+    // onScrollChange();
 
-    this.setState(
-      {
-        scrolledToHighlightId: EMPTY_ID,
-      },
-      () => this.renderHighlightLayers()
-    );
+    // this.setState(
+    //   {
+    //     scrolledToHighlightId: EMPTY_ID,
+    //   },
+    //   () => this.renderHighlightLayers()
+    // );
 
     this.viewer.container.removeEventListener("scroll", this.onScroll);
   };
