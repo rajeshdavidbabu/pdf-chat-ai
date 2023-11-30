@@ -4,6 +4,13 @@ import { callChain } from "@/lib/langchain";
 export async function POST(req: NextRequest) {
   const { question, chatHistory, translation, targetLang, indexKey } = await req.json();
 
+
+  if(!indexKey){
+    return NextResponse.json("Error: No index key in the request", {
+      status: 400,
+    });
+  }
+
   if (!question) {
     return NextResponse.json("Error: No question in the request", {
       status: 400,
