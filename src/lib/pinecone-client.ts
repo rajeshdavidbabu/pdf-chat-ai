@@ -16,7 +16,15 @@ async function createIndex(client: PineconeClient, indexName: string) {
     console.log(
       `Waiting for ${env.INDEX_INIT_TIMEOUT} seconds for index initialization to complete...`
     );
-    await delay(env.INDEX_INIT_TIMEOUT);
+
+    console.log("creating index")
+    const existingIndexes = await client.listIndexes();
+    console.log(existingIndexes)
+    while ((await client.listIndexes()).length==0) {
+    console.log("create didnt finish yet, waiting 1 second")
+      await delay(1000);
+    }
+    await delay(40000);
     console.log("Index created !!");
   } catch (error) {
     console.error("error ", error);
@@ -29,7 +37,12 @@ async function deleteIndex(client: PineconeClient, indexName:string){
   try {
     let resp = await client.deleteIndex({indexName:indexName});
     console.log("delete index requested"+resp)
-    await delay(env.INDEX_INIT_TIMEOUT);
+    while ((await client.listIndexes()).length>0) {
+      console.log("delete didnt finish yet, waiting 1 second")
+      await delay(1000);
+    }
+    const existingIndexes = await client.listIndexes();
+    console.log(existingIndexes)
   } catch (error) {
     console.error("error ", error);
     throw new Error("Index creation failed");
