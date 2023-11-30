@@ -5,6 +5,8 @@ body {
       sans-serif;
     background-color: #ffffff;
     color: #fff;
+    scrollbar-width: none; /* Firefox 64 */
+    -ms-overflow-style: none;  /* IE 11 */
   }
   
   .sidebar {
@@ -68,4 +70,8 @@ body {
   blockquote:after {
     content: close-quote;
   }
+
+::-webkit-scrollbar {
+  display: none;
+}
   
