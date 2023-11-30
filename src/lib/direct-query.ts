@@ -13,7 +13,7 @@ type callQueryArgs = {
     transformStream: TransformStream;
 };
 
-const QA_TEMPLATE = (language: string, question: string) => `Translate ${question} into ${language}. 
+const QA_TEMPLATE = (language: string, question: string) => `Translate "${question}" into ${language}. 
   The first part of the response is short and concise. The second part is a detailed explaination.
   Response only with target language and in markdown format.`;
 
