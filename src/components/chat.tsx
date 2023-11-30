@@ -7,7 +7,7 @@ import { ChatLine } from "./chat-line";
 import { ChatGPTMessage, DocumentInfo } from "@/types";
 import { Document } from "langchain/document";
 import { PdfContext } from "@/app/page";
-import { Button, Input, TextArea } from "@douyinfe/semi-ui";
+import { Button, Input, TextArea, Typography } from "@douyinfe/semi-ui";
 import "./chat.css";
 import { IHighlight } from "@/app/types/types";
 
@@ -36,6 +36,7 @@ const aiModeToEndpoint = {
 };
 
 export const Chat = () => {
+  const { Paragraph } = Typography;
   const {
     addHighlight,
     setHighlights,
@@ -49,6 +50,7 @@ export const Chat = () => {
     summary,
     isAIBusy,
     setIsAIBusy,
+    showChat,
   } = useContext(PdfContext);
   const endpoint = "/api/chat";
   const [input, setInput] = useState("");
@@ -77,24 +79,21 @@ export const Chat = () => {
     };
   }, [fileName]);
 
-  
   useEffect(() => {
-    console.log('storage: ', storage
-    .find((s) => s.fileName === localStorage.getItem("fileName") || "")
-    ?.histories);
-    const chatHistory = storage
-    .find((s) => s.fileName === localStorage.getItem("fileName") || "")
-    ?.histories.find((h) => h.highlightId === currHighlightId)?.chatHistory ||
-    [];
+    const chatHistory =
+      storage
+        .find((s) => s.fileName === localStorage.getItem("fileName") || "")
+        ?.histories.find((h) => h.highlightId === currHighlightId)
+        ?.chatHistory || [];
     setChatHistory(chatHistory);
     const msgList: ChatGPTMessage[] = [];
-    chatHistory.forEach(item => {
+    chatHistory.forEach((item) => {
       msgList.push({
-        role: 'user',
+        role: "user",
         content: item[0],
       });
       msgList.push({
-        role: 'assistant',
+        role: "assistant",
         content: item[1],
       });
     });
@@ -129,6 +128,14 @@ export const Chat = () => {
       );
     }
   }, [isLoading]);
+
+  useEffect(() => {
+    if (showChat) {
+      setTimeout(() => {
+        (document.querySelector('#chat-box') as HTMLElement).focus();
+      }, 300);
+    }
+  }, [showChat]);
 
   const handleStreamEnd = (
     question: string,
@@ -236,6 +243,14 @@ export const Chat = () => {
     }
   }, [summary]);
 
+  useEffect(() => {
+    if (!isLoading) {
+      setTimeout(() => {
+        saveCurrChat();
+      }, 500);
+    }
+  }, [chatHistory, isLoading]);
+
   const saveCurrChat = () => {
     const highlightsCopy = [...highlights];
     const index = highlightsCopy.findIndex(
@@ -320,6 +335,23 @@ export const Chat = () => {
         maxHeight: "100%",
       }}
     >
+      {selectedHighlight?.content?.text ? (
+        <>
+          <div className="text-black text-lg font-bold">Ask about...</div>
+          <Paragraph
+            ellipsis={{
+              rows: 3,
+              expandable: true,
+              collapsible: true,
+              expandText: "Show more",
+              collapseText: "Show less",
+            }}
+            style={{ width: "100%" }}
+          >
+            {`"${selectedHighlight?.content?.text}":`}
+          </Paragraph>
+        </>
+      ) : null}
       <div ref={containerRef}>
         {messages.map(({ content, role, sources }, index) => (
           <ChatLine
@@ -346,6 +378,7 @@ export const Chat = () => {
       {/* <div className="text-black">{selectedText}</div> */}
       <div style={{ position: "sticky", bottom: 0, backgroundColor: "white" }}>
         <TextArea
+          id="chat-box"
           className="mt-2"
           style={{ backgroundColor: "rgba(var(--semi-grey-0), 1)" }}
           value={userQuestion}
@@ -359,17 +392,6 @@ export const Chat = () => {
           }}
         />
         <div className="flex justify-end mt-2">
-          {selectedHighlight?.position ? (
-            <Button
-              className="save-annotation"
-              theme="borderless"
-              type="primary"
-              style={{ marginRight: 8, color: "black" }}
-              onClick={saveCurrChat}
-            >
-              Save as annotation
-            </Button>
-          ) : null}
           <Button
             theme="solid"
             type="primary"

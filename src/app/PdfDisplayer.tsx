@@ -32,7 +32,7 @@ const getNextId = () => String(Math.random()).slice(2);
 const parseIdFromHash = () =>
   document.location.hash.slice("#highlight-".length);
 
-const resetHash = () => {
+export const resetHash = () => {
   document.location.hash = "";
 };
 

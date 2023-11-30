@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import type { IHighlight } from "react-pdf-highlighter";
 import { PdfContext } from "./page";
+import { resetHash } from "./PdfDisplayer";
 
 interface Props {
   highlights: Array<IHighlight>;
@@ -94,7 +95,10 @@ export function Sidebar({
               <div
                 className="relative top-3"
                 style={{ color: "rgba(var(--semi-grey-4), 1)" }}
-                onClick={() => deleteHighlight(highlight.id)}
+                onClick={() => {
+                  deleteHighlight(highlight.id);
+                  resetHash();
+                }}
               >
                 Delete
               </div>

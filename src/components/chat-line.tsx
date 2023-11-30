@@ -39,7 +39,7 @@ export function ChatLine({
         <div>{formattedMessage}</div>
         {sources ? (
           <Collapse accordion className="mt-1">
-            {sources.map((source, index) => (
+            {sources?.slice(0, 3)?.map((source, index) => (
               <Collapse.Panel
                 key={index}
                 header={`Source ${index + 1}`}
