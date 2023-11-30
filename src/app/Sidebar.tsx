@@ -4,7 +4,7 @@ import type { IHighlight } from "react-pdf-highlighter";
 interface Props {
   highlights: Array<IHighlight>;
   resetHighlights: () => void;
-  onDocumentOpened: (url: string) => void;
+  onFileOpen?: (file: File) => void;
 }
 
 const updateHash = (highlight: IHighlight) => {
@@ -15,8 +15,8 @@ declare const APP_VERSION: string;
 
 export function Sidebar({
   highlights,
-  onDocumentOpened,
   resetHighlights,
+  onFileOpen,
 }: Props): React.ReactElement {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -30,9 +30,8 @@ export function Sidebar({
     if (!selectedFile) {
       return;
     }
-    const fileUrl = URL.createObjectURL(selectedFile);
-    console.log(fileUrl);
-    onDocumentOpened(fileUrl);
+    console.log(selectedFile);
+    onFileOpen?.(selectedFile);
   }, [selectedFile]);
 
   return (

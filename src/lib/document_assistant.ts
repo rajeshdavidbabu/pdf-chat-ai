@@ -45,7 +45,7 @@ export async function initDocumentAssistantManager(filePathOrBlob: string | Blob
 
 
 
-export async function getDocumentAssistantManager() {
+export function getDocumentAssistantManager() {
   return documentAssistantManagerInstance
 }
 
