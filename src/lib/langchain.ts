@@ -4,6 +4,7 @@ import { ConversationalRetrievalQAChain } from "langchain/chains";
 import { getVectorStore } from "./vector-store";
 import { getPineconeClient } from "./pinecone-client";
 import { formatChatHistory } from "./utils";
+import { PineconeClient } from "@pinecone-database/pinecone";
 
 const CONDENSE_TEMPLATE = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
 
@@ -83,6 +84,8 @@ type callChainArgs = {
   question: string;
   chatHistory: [string, string][];
   transformStream: TransformStream;
+  pineconeClient:PineconeClient|null|undefined;
+  indexName:string;
   translation: boolean;
   targetLang: string;
 };
@@ -90,15 +93,24 @@ type callChainArgs = {
 export async function callChain({
   question,
   chatHistory,
-  transformStream,
+  transformStream, 
+  pineconeClient,
+  indexName,
   translation,
   targetLang,
 }: callChainArgs) {
   try {
     // Open AI recommendation
     const sanitizedQuestion = question.trim().replaceAll("\n", " ");
-    const pineconeClient = await getPineconeClient();
-    const vectorStore = await getVectorStore(pineconeClient);
+    
+    if (pineconeClient===null||pineconeClient===undefined){
+      return
+    }
+
+
+
+
+    const vectorStore = await getVectorStore(pineconeClient,indexName);
 
     // Create encoding to convert token (string) to Uint8Array
     const encoder = new TextEncoder();

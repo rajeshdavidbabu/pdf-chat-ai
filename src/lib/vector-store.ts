@@ -6,12 +6,13 @@ import { PineconeClient } from "@pinecone-database/pinecone";
 export async function pineconeEmbedAndStore(
   client: PineconeClient,
   // @ts-ignore docs type error
-  docs: Document<Record<string, any>>[]
+  docs: Document<Record<string, any>>[],
+  key:string
 ) {
   /*create and store the embeddings in the vectorStore*/
   try {
     const embeddings = new OpenAIEmbeddings();
-    const index = client.Index(env.PINECONE_INDEX_NAME);
+    const index = client.Index(key);
 
     //embed the PDF documents
     await PineconeStore.fromDocuments(docs, embeddings, {
@@ -25,10 +26,10 @@ export async function pineconeEmbedAndStore(
   }
 }
 
-export async function getVectorStore(client: PineconeClient) {
+export async function getVectorStore(client: PineconeClient,key:string) {
   try {
     const embeddings = new OpenAIEmbeddings();
-    const index = client.Index(env.PINECONE_INDEX_NAME);
+    const index = client.Index(key);
 
     const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
       pineconeIndex: index,
