@@ -169,7 +169,7 @@ class PdfDisplayer extends Component<{}, State> {
         <div
           style={{
             height: "100%",
-            width: "75vw",
+            width: '60vw',
             position: "relative",
           }}
         >

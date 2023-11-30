@@ -28,7 +28,7 @@ export const PdfContext = createContext<{
 });
 
 export default function Home() {
-  const [showChat, setShowChat] = useState(false);
+  const [showChat, setShowChat] = useState(true);
   const [selectedText, setSelectedText] = useState("");
   const [aiMode, setAiMode] = useState("translation");
   const [fileName, setFileName] = useState<string>("");
@@ -61,7 +61,7 @@ export default function Home() {
         </div>
       </div>
       <main
-        className="w-full"
+        className="flex w-full"
         style={{
           height: "calc(100vh - 56px)",
           backgroundColor: "rgba(var(--semi-grey-0), 1)",

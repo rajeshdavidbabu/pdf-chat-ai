@@ -7,7 +7,8 @@ import { ChatLine } from "./chat-line";
 import { ChatGPTMessage, DocumentInfo } from "@/types";
 import { Document } from "langchain/document";
 import { PdfContext } from "@/app/page";
-import { Button, Input } from "@douyinfe/semi-ui";
+import { Button, Input, TextArea } from "@douyinfe/semi-ui";
+import "./chat.css";
 
 export const Chat = () => {
   const endpoint = "/api/chat";
@@ -122,15 +123,16 @@ export const Chat = () => {
   if (messages.length > 2) {
     placeholder = "Type to continue your conversation";
   }
+  console.log("messages: ", messages);
 
   return (
     <div
-      className="fixed right-3 top-2 p-3 overflow-y-auto"
+      className="overflow-y-auto"
       style={{
-        borderRadius: 18,
         width: "20vw",
+        padding: '12px 12px 0 12px',
         backgroundColor: "white",
-        maxHeight: "90vh",
+        maxHeight: "100%",
       }}
     >
       <div ref={containerRef}>
@@ -156,16 +158,36 @@ export const Chat = () => {
         placeholder={placeholder}
         isLoading={isLoading}
       /> */}
-      <div className="text-black">{selectedText}</div>
-      <Input value={userQuestion} onChange={setUserQuestion} />
-      <div className="flex justify-end mt-1">
-        <Button
-          theme="solid"
-          type="primary"
-          onClick={() => sendQuestion(`${selectedText} ${userQuestion}`)}
-        >
-          Send
-        </Button>
+      {/* <div className="text-black">{selectedText}</div> */}
+      <div style={{ position: 'sticky', bottom: 0, backgroundColor: 'white' }}>
+        <TextArea
+          className="mt-2"
+          style={{ backgroundColor: 'rgba(var(--semi-grey-0), 1)' }}
+          value={userQuestion}
+          rows={2}
+          onChange={setUserQuestion}
+          onEnterPress={(e) => {
+            sendQuestion(`${selectedText} ${userQuestion}`);
+            setTimeout(() => {
+              setUserQuestion('');
+            }, 50);
+          }}
+        />
+        <div className="flex justify-end mt-1">
+          <Button
+            theme="solid"
+            type="primary"
+            onClick={() => {
+              sendQuestion(`${selectedText} ${userQuestion}`);
+              setTimeout(() => {
+                setUserQuestion('');
+              }, 50);
+            }}
+            style={{ backgroundColor: 'black', color: 'white' }}
+          >
+            Send
+          </Button>
+        </div>
       </div>
     </div>
   );
