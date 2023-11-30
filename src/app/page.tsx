@@ -26,6 +26,8 @@ export type PdfContextProps = {
   setSelectedHighlight?: React.Dispatch<
     React.SetStateAction<IHighlight | undefined>
   >;
+  summary: string;
+  setSummary?: React.Dispatch<React.SetStateAction<string>>;
   storage: FileStorage[];
 };
 
@@ -45,6 +47,8 @@ export const PdfContext = createContext<PdfContextProps>({
   addHighlight: undefined,
   selectedHighlight: undefined,
   setSelectedHighlight: undefined,
+  summary: "",
+  setSummary: undefined,
   storage: [],
 });
 
@@ -57,6 +61,7 @@ export default function Home() {
   const [fileName, setFileName] = useState<string>("");
   const [indexKey, setIndexKey] = useState<string>("");
   const [highlights, setHighlights] = useState<IHighlight[]>([]);
+  const [summary, setSummary] = useState<string>("");
   const titleRef = useRef(null);
   const isHovering = useHover(titleRef);
   const [selectedHighlight, setSelectedHighlight] = useState<IHighlight>();
@@ -127,6 +132,8 @@ export default function Home() {
             addHighlight,
             selectedHighlight,
             setSelectedHighlight,
+            summary,
+            setSummary,
             storage,
           }}
         >
