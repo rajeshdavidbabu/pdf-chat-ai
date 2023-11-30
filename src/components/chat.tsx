@@ -47,7 +47,10 @@ export const Chat = () => {
     streamingAIContent: string,
     sourceDocuments: string
   ) => {
-    const sourceContents: DocumentInfo[] = JSON.parse(sourceDocuments);
+    let sourceContents: DocumentInfo[] = [] 
+    if (sourceDocuments) {
+      sourceContents = JSON.parse(sourceDocuments);
+    }
     let sources: DocumentInfo[] = [];
 
     sourceContents.forEach((element) => {
@@ -116,7 +119,6 @@ export const Chat = () => {
           updateStreamingAIContent(streamingAIContent);
         }
       }
-
       handleStreamEnd(question, streamingAIContent, sourceDocuments);
     } catch (error) {
       console.log("Error occured ", error);
@@ -126,7 +128,6 @@ export const Chat = () => {
   };
 
   useEffect(() => {
-    console.log("ai mode or selected text changed", aiMode, selectedText)
     if (aiMode === 'translate' && selectedText !== "") {
       sendQuestion(selectedText, 'translate');
     }
