@@ -13,8 +13,8 @@ type callQueryArgs = {
     transformStream: TransformStream;
 };
 
-const QA_TEMPLATE = (language: string, question: string) => `Please translate this into ${language}.
-  Content: ${question}
+const QA_TEMPLATE = (language: string, question: string) => `Please translate this into {language}.
+  Content: {question}
   Helpful answer in markdown:`;
   
 
@@ -36,13 +36,12 @@ export async function callDirectQuery({
     try {
         chat.call([new HumanChatMessage(QA_TEMPLATE(language, question))]).then(async (res) => {
         await writer.ready;
+        await writer.write(encoder.encode("tokens-ended"));
         setTimeout(async () => {
           await writer.ready;
           await writer.write(encoder.encode(`${res.content}`));
-          await writer.write(encoder.encode("tokens-ended"));
           await writer.close();
         }, 100);
-        
       });
       return transformStream?.readable;
     } catch (error) {
