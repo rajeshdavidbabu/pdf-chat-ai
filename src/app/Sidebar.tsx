@@ -5,7 +5,7 @@ import { PdfContext } from "./page";
 interface Props {
   highlights: Array<IHighlight>;
   deleteHighlight: (id: string) => void;
-  onDocumentOpened: (url: string) => void;
+  onFileOpen?: (file: File) => void;
 }
 
 export const updateHash = (highlight: IHighlight) => {
@@ -16,11 +16,11 @@ declare const APP_VERSION: string;
 
 export function Sidebar({
   highlights,
-  onDocumentOpened,
   deleteHighlight,
+  onFileOpen
 }: Props): React.ReactElement {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { setFileName } = useContext(PdfContext);
+  const { setFileName, setIndexKey } = useContext(PdfContext);
 
   const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -28,13 +28,15 @@ export function Sidebar({
     }
   };
 
-  useEffect(() => {
+   useEffect(() => {
     if (!selectedFile) {
       return;
     }
-    const fileUrl = URL.createObjectURL(selectedFile);
+    console.log(selectedFile);
     setFileName?.(selectedFile.name);
-    onDocumentOpened(fileUrl);
+    const key = selectedFile.name.replace(/[^a-zA-Z0-9]/g, '');
+    setIndexKey?.(key)
+    onFileOpen?.(selectedFile);
   }, [selectedFile]);
 
   return (

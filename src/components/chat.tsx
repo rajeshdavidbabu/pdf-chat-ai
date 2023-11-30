@@ -11,6 +11,7 @@ import { Button, Input, TextArea } from "@douyinfe/semi-ui";
 import "./chat.css";
 
 export const Chat = () => {
+  const { indexKey, selectedText } = useContext(PdfContext);
   const endpoint = "/api/chat";
   const [input, setInput] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -18,7 +19,6 @@ export const Chat = () => {
   const [chatHistory, setChatHistory] = useState<[string, string][]>([]);
   const [streamingAIContent, setStreamingAIContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
-  const { selectedText } = useContext(PdfContext);
   const [userQuestion, setUserQuestion] = useState("");
   console.log("selectedText: ", selectedText);
 
@@ -75,6 +75,7 @@ export const Chat = () => {
         body: JSON.stringify({
           question,
           chatHistory,
+          indexKey
         }),
       });
 
