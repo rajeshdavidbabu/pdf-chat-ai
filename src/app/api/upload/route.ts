@@ -19,15 +19,10 @@ export async function POST(req: NextRequest) {
   }
   try {
 
-    const pineconeClient = await getPineconeClient(key);
+    const pineconeClient = await getPineconeClient(key,true, file);
     if (pineconeClient===null){
         return
     }
-    console.log("Preparing chunks from PDF file");
-    const docs = await getChunkedDocsFromPDF(file);
-    console.log(`Loading ${docs.length} chunks into pinecone...`);
-    await pineconeEmbedAndStore(pineconeClient, docs,key);
-    console.log("Data embedded and stored in pine-cone index");
     return NextResponse.json("init document assistant manager success", {
       status: 200,
     });

@@ -99,7 +99,11 @@ export async function callChain({
   try {
     // Open AI recommendation
     const sanitizedQuestion = question.trim().replaceAll("\n", " ");
-    const pineconeClient = await getPineconeClient(indexKey);
+    const pineconeClient = await getPineconeClient(indexKey,true,"");
+    if (pineconeClient==null){
+      return
+    }
+
     const vectorStore = await getVectorStore(pineconeClient,indexKey);
 
     // Create encoding to convert token (string) to Uint8Array

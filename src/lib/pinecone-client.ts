@@ -1,6 +1,8 @@
 import { PineconeClient } from "@pinecone-database/pinecone";
 import { env } from "./config";
 import { delay } from "./utils";
+import { getChunkedDocsFromPDF } from "@/lib/pdf-loader";
+import { pineconeEmbedAndStore } from "@/lib/vector-store";
 
 let pineconeClientInstance: PineconeClient | null = null;
 
@@ -24,7 +26,7 @@ async function createIndex(client: PineconeClient, indexName: string) {
     console.log("create didnt finish yet, waiting 1 second")
       await delay(1000);
     }
-    await delay(40000);
+    await delay(20000);
     console.log("Index created !!");
   } catch (error) {
     console.error("error ", error);
@@ -49,7 +51,7 @@ async function deleteIndex(client: PineconeClient, indexName:string){
   }
 }
 
-async function initPineconeClient(indexKey :string) {
+async function initPineconeClient(indexKey :string, file: string | Blob) {
   try {
     const pineconeClient = new PineconeClient();
     await pineconeClient.init({
@@ -66,9 +68,21 @@ async function initPineconeClient(indexKey :string) {
 
      await createIndex(pineconeClient, indexName);
 
+    console.log("Preparing chunks from PDF file");
+    const docs = await getChunkedDocsFromPDF(file);
+    console.log(`Loading ${docs.length} chunks into pinecone...`);
+    await pineconeEmbedAndStore(pineconeClient, docs,indexKey);
+    console.log("Data embedded and stored in pine-cone index");
+
 
     }else if (existingIndexes.length==0){
      await createIndex(pineconeClient, indexName);
+
+    console.log("Preparing chunks from PDF file");
+    const docs = await getChunkedDocsFromPDF(file);
+    console.log(`Loading ${docs.length} chunks into pinecone...`);
+    await pineconeEmbedAndStore(pineconeClient, docs,indexKey);
+    console.log("Data embedded and stored in pine-cone index");
     }
     
     else {
@@ -82,10 +96,9 @@ async function initPineconeClient(indexKey :string) {
   }
 }
 
-export async function getPineconeClient( index:string) {
-  if (!pineconeClientInstance) {
-    pineconeClientInstance = await initPineconeClient(index);
+export async function getPineconeClient( index:string, genNew:boolean, filePathOrBlob: string | Blob) {
+  if (genNew){
+    pineconeClientInstance = await initPineconeClient(index,filePathOrBlob);
   }
-
   return pineconeClientInstance;
 }
