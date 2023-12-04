@@ -1,19 +1,29 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { InputMessage } from "./input-message";
 import { scrollToBottom, initialMessage } from "@/lib/utils";
 import { ChatLine } from "./chat-line";
-import { ChatGPTMessage } from "@/types";
+import { ChatGPTMessage, DocumentInfo } from "@/types";
+import { Document } from "langchain/document";
+import { PdfContext } from "@/app/page";
+import { Button, Input, TextArea } from "@douyinfe/semi-ui";
+import "./chat.css";
 
-export function Chat() {
-  const endpoint = "/api/chat";
+const aiModeToEndpoint = {
+  'translate': "/api/translate",
+  'chat': "/api/chat"
+}
+
+export const Chat = () => {
+  const { indexKey, selectedText, aiMode } = useContext(PdfContext);
   const [input, setInput] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [messages, setMessages] = useState<ChatGPTMessage[]>(initialMessage);
   const [chatHistory, setChatHistory] = useState<[string, string][]>([]);
   const [streamingAIContent, setStreamingAIContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [userQuestion, setUserQuestion] = useState("");
 
   const updateMessages = (message: ChatGPTMessage) => {
     setMessages((previousMessages) => [...previousMessages, message]);
@@ -37,8 +47,12 @@ export function Chat() {
     streamingAIContent: string,
     sourceDocuments: string
   ) => {
-    const sources = JSON.parse(sourceDocuments);
+    const sourceContents: DocumentInfo[] = JSON.parse(sourceDocuments);
+    let sources: DocumentInfo[] = [];
 
+    sourceContents.forEach((element) => {
+      sources.push(element);
+    });
     // Add the streamed message as the AI response
     // And clear the streamingAIContent state
     updateMessages({
@@ -51,9 +65,11 @@ export function Chat() {
   };
 
   // send message to API /api/chat endpoint
-  const sendQuestion = async (question: string) => {
+  const sendQuestion = async (question: string, aiMode: 'translate' | 'chat' = "chat") => {
+    const endpoint = aiModeToEndpoint[aiMode];
+
     setIsLoading(true);
-    updateMessages({ role: "user", content: question });
+    updateMessages({ role: "user", content:  aiMode === "translate" ? `Translate ${question}` : question });
 
     try {
       const response = await fetch(endpoint, {
@@ -64,6 +80,8 @@ export function Chat() {
         body: JSON.stringify({
           question,
           chatHistory,
+          indexKey,
+          ...(aiMode === "translate" && { language: "Chinese" })
         }),
       });
 
@@ -80,10 +98,19 @@ export function Chat() {
         }
 
         const text = new TextDecoder().decode(value);
-        if (text === "tokens-ended" && !tokensEnded) {
+        if (text.includes("tokens-ended") && !tokensEnded) {
           tokensEnded = true;
+
+          let texts = text.split("tokens-ended");
+          if (texts.length > 1) {
+            streamingAIContent = streamingAIContent + texts[0];
+            updateStreamingAIContent(streamingAIContent);
+          }
+          if (texts.length > 2) {
+            sourceDocuments += texts[1];
+          }
         } else if (tokensEnded) {
-          sourceDocuments = text;
+          sourceDocuments += text;
         } else {
           streamingAIContent = streamingAIContent + text;
           updateStreamingAIContent(streamingAIContent);
@@ -98,15 +125,31 @@ export function Chat() {
     }
   };
 
+  useEffect(() => {
+    console.log("ai mode or selected text changed", aiMode, selectedText)
+    if (aiMode === 'translate' && selectedText !== "") {
+      sendQuestion(selectedText, 'translate');
+    }
+  }, [aiMode, selectedText])
+
   let placeholder = "Type a message to start ...";
 
   if (messages.length > 2) {
     placeholder = "Type to continue your conversation";
   }
+  console.log("messages: ", messages);
 
   return (
-    <div className="rounded-2xl border h-[75vh] flex flex-col justify-between">
-      <div className="p-6 overflow-auto" ref={containerRef}>
+    <div
+      className="overflow-y-auto"
+      style={{
+        width: "20vw",
+        padding: "12px 12px 0 12px",
+        backgroundColor: "white",
+        maxHeight: "100%",
+      }}
+    >
+      <div ref={containerRef}>
         {messages.map(({ content, role, sources }, index) => (
           <ChatLine
             key={index}
@@ -122,13 +165,47 @@ export function Chat() {
         )}
       </div>
 
-      <InputMessage
+      {/* <InputMessage
         input={input}
         setInput={setInput}
         sendMessage={sendQuestion}
         placeholder={placeholder}
         isLoading={isLoading}
-      />
+      /> */}
+      {/* <div className="text-black">{selectedText}</div> */}
+      <div style={{ position: "sticky", bottom: 0, backgroundColor: "white" }}>
+        <TextArea
+          className="mt-2"
+          style={{ backgroundColor: "rgba(var(--semi-grey-0), 1)" }}
+          value={userQuestion}
+          rows={2}
+          onChange={setUserQuestion}
+          onEnterPress={(e) => {
+            sendQuestion(`${selectedText} ${userQuestion}`);
+            setTimeout(() => {
+              setUserQuestion("");
+            }, 50);
+          }}
+        />
+        <div className="flex justify-end mt-2">
+          <Button className="save-annotation" theme="borderless" type="primary" style={{ marginRight: 8, color: 'black' }}>
+            Save as annotation
+          </Button>
+          <Button
+            theme="solid"
+            type="primary"
+            onClick={() => {
+              sendQuestion(`${selectedText} ${userQuestion}`);
+              setTimeout(() => {
+                setUserQuestion("");
+              }, 50);
+            }}
+            style={{ backgroundColor: "black", color: "white" }}
+          >
+            Send
+          </Button>
+        </div>
+      </div>
     </div>
   );
-}
+};

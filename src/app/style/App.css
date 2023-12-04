@@ -1,0 +1,77 @@
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+      "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+      sans-serif;
+    background-color: #ffffff;
+    color: #fff;
+    scrollbar-width: none; /* Firefox 64 */
+    -ms-overflow-style: none;  /* IE 11 */
+  }
+  
+  .sidebar {
+    overflow-y: auto;
+    overflow-x: hidden;
+    color: black;
+  }
+  
+  .sidebar__highlights {
+    overflow-x: visible;
+    padding: 0;
+  }
+  
+  .highlight__location {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    text-align: right;
+    font-size: 10px;
+  }
+  
+  .highlight__image {
+    overflow: auto;
+    max-width: 260px;
+    border: 1px dashed;
+  }
+  
+  .sidebar__highlight {
+    position: relative;
+    left: 0;
+    margin: 8px 0;
+    width: 100%;
+    padding: 1.5rem;
+    cursor: pointer;
+    border-radius: 0;
+    background-color: white;
+    transition: 120ms ease-in-out;
+  }
+
+  .sidebar__highlight:hover {
+    position: relative;
+    left: 4px;
+    scale: 1.01;
+    background: rgba(58, 56, 52, 0.08);
+    transition: 220ms ease-in-out;
+
+  }
+  
+  a {
+    color: #d35400;
+  }
+  
+  blockquote {
+    padding: 0;
+    margin: 0;
+    quotes: "\201c" "\201d";
+  }
+  blockquote:before {
+    content: open-quote;
+  }
+  blockquote:after {
+    content: close-quote;
+  }
+
+::-webkit-scrollbar {
+  display: none;
+}
+  

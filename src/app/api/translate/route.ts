@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callChain } from "@/lib/langchain";
+import { callDirectQuery } from "@/lib/direct-query";
 
 export async function POST(req: NextRequest) {
-  const { question, chatHistory, translation, targetLang, indexKey } = await req.json();
-
-
-  if(!indexKey){
-    return NextResponse.json("Error: No index key in the request", {
-      status: 400,
-    });
-  }
+  const { language, question } = await req.json();
 
   if (!question) {
     return NextResponse.json("Error: No question in the request", {
@@ -19,18 +12,15 @@ export async function POST(req: NextRequest) {
 
   try {
     const transformStream = new TransformStream();
-    const readableStream = callChain({
+    const readableStream = callDirectQuery({
+      language,
       question,
-      chatHistory,
       transformStream,
-      translation: translation || question.includes("translate"),
-      targetLang: targetLang || "Chinese", 
-      indexKey:indexKey||"a",
     });
 
     return new Response(await readableStream);
   } catch (error) {
-    console.error("Internal server error ", error);
+    console.log("Internal server error ", error, 1234);
     return NextResponse.json("Error: Something went wrong. Try again!", {
       status: 500,
     });

@@ -1,18 +1,95 @@
+"use client";
+
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { Chat } from "@/components/chat";
+import PdfDisplayer from "./PdfDisplayer";
+import { createContext, useRef, useState } from "react";
+import { Button, Content, Header, Layout } from "@douyinfe/semi-ui";
+import { useHover } from "ahooks";
+
+export const PdfContext = createContext<{
+  showChat: boolean;
+  setShowChat?: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedText: string;
+  setSelectedText?: React.Dispatch<React.SetStateAction<string>>;
+  aiMode: 'chat' | 'translate';
+  setAiMode?: React.Dispatch<React.SetStateAction<'chat' | 'translate'>>;
+  fileName: string;
+  setFileName?: React.Dispatch<React.SetStateAction<string>>;
+  indexKey: string;
+  setIndexKey?: React.Dispatch<React.SetStateAction<string>>;
+}>({
+  showChat: false,
+  setShowChat: undefined,
+  selectedText: "",
+  setSelectedText: undefined,
+  aiMode: "chat",
+  setAiMode: undefined,
+  fileName: "",
+  setFileName: undefined,
+  indexKey: "",
+  setIndexKey: undefined,
+});
 
 export default function Home() {
+  const [showChat, setShowChat] = useState(true);
+  const [selectedText, setSelectedText] = useState("");
+  const [aiMode, setAiMode] = useState<'chat' | 'translate'>("chat");
+  const [fileName, setFileName] = useState<string>("");
+  const [indexKey, setIndexKey] = useState<string>("");
+  const titleRef = useRef(null);
+  const isHovering = useHover(titleRef);
   return (
-    <main className="relative container flex min-h-screen flex-col">
-      <div className=" p-4 flex h-14 items-center justify-between supports-backdrop-blur:bg-background/60 sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
-        <span className="font-bold">pdf-chat-ai</span>
-        <DarkModeToggle />
-      </div>
-      <div className="flex flex-1 py-4">
-        <div className="w-full">
-          <Chat />
+    <>
+      <div
+        ref={titleRef}
+        className="flex justify-center items-center font-bold"
+        style={{
+          height: 48,
+          backgroundColor: "black",
+        }}
+      >
+        <div className="flex items-center px-20 py-2">
+          <div className="mr-3">{fileName}</div>
+          {isHovering ? (
+            <Button
+              style={{ color: "rgba(255, 226, 143, 1)" }}
+              onClick={() =>
+                (
+                  document.querySelector("#upload-pdf-input") as HTMLElement
+                )?.click()
+              }
+            >
+              Open New...
+            </Button>
+          ) : null}
         </div>
       </div>
-    </main>
+      <main
+        className="flex w-full"
+        style={{
+          height: "calc(100vh - 56px)",
+          backgroundColor: "rgba(var(--semi-grey-0), 1)",
+        }}
+      >
+        <PdfContext.Provider
+          value={{
+            showChat,
+            setShowChat,
+            selectedText,
+            setSelectedText,
+            aiMode,
+            setAiMode,
+            fileName,
+            setFileName,
+            indexKey,
+            setIndexKey
+          }}
+        >
+          <PdfDisplayer />
+          {showChat ? <Chat /> : null}
+        </PdfContext.Provider>
+      </main>
+    </>
   );
 }
