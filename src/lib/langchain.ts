@@ -12,6 +12,14 @@ Chat History:
 Follow Up Input: {question}
 Standalone question:`;
 
+const TRANSLATE_TEMPLATE = `You are an enthusiastic AI translator. Use the following pieces of context to answer the question at the end.
+
+{context}
+
+Question: {question}
+Target language: {target_lang}
+Helpful answer in markdown:`;
+
 const QA_TEMPLATE = `You are an enthusiastic AI assistant. Use the following pieces of context to answer the question at the end.
 If you don't know the answer, just say you don't know. DO NOT try to make up an answer.
 If the question is not related to the context, politely respond that you are tuned to only answer questions that are related to the context.
@@ -23,7 +31,9 @@ Helpful answer in markdown:`;
 
 function makeChain(
   vectorstore: PineconeStore,
-  writer: WritableStreamDefaultWriter
+  writer: WritableStreamDefaultWriter,
+  translation: boolean,
+  targetLang: string,
 ) {
   // Create encoding to convert token (string) to Uint8Array
   const encoder = new TextEncoder();
@@ -58,7 +68,7 @@ function makeChain(
     streamingModel,
     vectorstore.asRetriever(),
     {
-      qaTemplate: QA_TEMPLATE,
+      qaTemplate: translation ? TRANSLATE_TEMPLATE.replace("{target_lang}", targetLang) : QA_TEMPLATE,
       questionGeneratorTemplate: CONDENSE_TEMPLATE,
       returnSourceDocuments: true, //default 4
       questionGeneratorChainOptions: {
@@ -73,23 +83,29 @@ type callChainArgs = {
   question: string;
   chatHistory: [string, string][];
   transformStream: TransformStream;
+  translation: boolean;
+  targetLang: string;
+  indexKey:string;
 };
 
 export async function callChain({
   question,
   chatHistory,
   transformStream,
+  translation,
+  targetLang,
+  indexKey,
 }: callChainArgs) {
   try {
     // Open AI recommendation
     const sanitizedQuestion = question.trim().replaceAll("\n", " ");
-    const pineconeClient = await getPineconeClient();
-    const vectorStore = await getVectorStore(pineconeClient);
+    const pineconeClient = await getPineconeClient(indexKey);
+    const vectorStore = await getVectorStore(pineconeClient,indexKey);
 
     // Create encoding to convert token (string) to Uint8Array
     const encoder = new TextEncoder();
     const writer = transformStream.writable.getWriter();
-    const chain = makeChain(vectorStore, writer);
+    const chain = makeChain(vectorStore, writer, translation, targetLang);
     const formattedChatHistory = formatChatHistory(chatHistory);
 
     // Question using chat-history
@@ -98,24 +114,32 @@ export async function callChain({
       .call({
         question: sanitizedQuestion,
         chat_history: formattedChatHistory,
+        target_lang: targetLang,
       })
       .then(async (res) => {
         const sourceDocuments = res?.sourceDocuments;
         const firstTwoDocuments = sourceDocuments.slice(0, 2);
-        const pageContents = firstTwoDocuments.map(
-          ({ pageContent }: { pageContent: string }) => pageContent
-        );
-        const stringifiedPageContents = JSON.stringify(pageContents);
+        
+        const documentInfo = firstTwoDocuments.map(({ pageContent, metadata }: { pageContent: string, metadata: Record<string, any> }) => {
+          return {
+            pageContent: pageContent,
+            line_from: metadata['loc.lines.from'],
+            line_to: metadata['loc.lines.to'],
+            page_no: metadata['loc.pageNumber'],
+          };
+        });
+
+        const stringifiedDocumentInfo = JSON.stringify(documentInfo);
         await writer.ready;
         await writer.write(encoder.encode("tokens-ended"));
+
         // Sending it in the next event-loop
         setTimeout(async () => {
           await writer.ready;
-          await writer.write(encoder.encode(`${stringifiedPageContents}`));
+          await writer.write(encoder.encode(`${stringifiedDocumentInfo}`));
           await writer.close();
         }, 100);
       });
-
     // Return the readable stream
     return transformStream?.readable;
   } catch (e) {

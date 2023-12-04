@@ -6,17 +6,17 @@ import { PineconeClient } from "@pinecone-database/pinecone";
 export async function pineconeEmbedAndStore(
   client: PineconeClient,
   // @ts-ignore docs type error
-  docs: Document<Record<string, any>>[]
+  docs: Document<Record<string, any>>[], indexKey:string
 ) {
   /*create and store the embeddings in the vectorStore*/
   try {
     const embeddings = new OpenAIEmbeddings();
-    const index = client.Index(env.PINECONE_INDEX_NAME);
+    const index = client.Index(indexKey);
 
     //embed the PDF documents
     await PineconeStore.fromDocuments(docs, embeddings, {
       pineconeIndex: index,
-      namespace: env.PINECONE_NAME_SPACE,
+      // namespace: env.PINECONE_NAME_SPACE,
       textKey: "text",
     });
   } catch (error) {
@@ -25,15 +25,15 @@ export async function pineconeEmbedAndStore(
   }
 }
 
-export async function getVectorStore(client: PineconeClient) {
+export async function getVectorStore(client: PineconeClient, indexKey:string) {
   try {
     const embeddings = new OpenAIEmbeddings();
-    const index = client.Index(env.PINECONE_INDEX_NAME);
+    const index = client.Index(indexKey);
 
     const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
       pineconeIndex: index,
       textKey: "text",
-      namespace: env.PINECONE_NAME_SPACE,
+      // namespace: env.PINECONE_NAME_SPACE,
     });
 
     return vectorStore;

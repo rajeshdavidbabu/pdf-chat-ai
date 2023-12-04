@@ -24,20 +24,41 @@ async function createIndex(client: PineconeClient, indexName: string) {
   }
 }
 
-async function initPineconeClient() {
+
+async function deleteIndex(client: PineconeClient, indexName:string){
+  try {
+    let resp = await client.deleteIndex({indexName:indexName});
+    console.log("delete index requested"+resp)
+    await delay(env.INDEX_INIT_TIMEOUT);
+  } catch (error) {
+    console.error("error ", error);
+    throw new Error("Index creation failed");
+  }
+}
+
+async function initPineconeClient(indexKey :string) {
   try {
     const pineconeClient = new PineconeClient();
     await pineconeClient.init({
       apiKey: env.PINECONE_API_KEY,
       environment: env.PINECONE_ENVIRONMENT,
     });
-    const indexName = env.PINECONE_INDEX_NAME;
+    const indexName = indexKey;
 
     const existingIndexes = await pineconeClient.listIndexes();
 
-    if (!existingIndexes.includes(indexName)) {
-      createIndex(pineconeClient, indexName);
-    } else {
+    if (!existingIndexes.includes(indexName) && existingIndexes.length!=0) {
+
+     await deleteIndex(pineconeClient,existingIndexes[0]);
+
+     await createIndex(pineconeClient, indexName);
+
+
+    }else if (existingIndexes.length==0){
+     await createIndex(pineconeClient, indexName);
+    }
+    
+    else {
       console.log("Your index already exists. nice !!");
     }
 
@@ -48,9 +69,9 @@ async function initPineconeClient() {
   }
 }
 
-export async function getPineconeClient() {
+export async function getPineconeClient( index:string) {
   if (!pineconeClientInstance) {
-    pineconeClientInstance = await initPineconeClient();
+    pineconeClientInstance = await initPineconeClient(index);
   }
 
   return pineconeClientInstance;

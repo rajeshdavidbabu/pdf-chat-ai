@@ -1,0 +1,14 @@
+.semi-collapse-header {
+    font-size: 12px;
+    margin: 0;
+    padding: 8px 4px;
+}
+
+.semi-input-textarea-wrapper-focus {
+    border-color: black;
+}
+
+.save-annotation:hover {
+    background-color: rgba(255, 226, 143, 1) !important;
+    transition: all 400ms;
+}
